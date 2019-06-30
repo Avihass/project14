@@ -7,7 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		193CB9B522B042EB00FDFD0B /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 193CB9B422B042EB00FDFD0B /* main.c */; };
+		193CB9B522B042EB00FDFD0B /* assembly.c in Sources */ = {isa = PBXBuildFile; fileRef = 193CB9B422B042EB00FDFD0B /* assembly.c */; };
+		19B00BB422C91F830058DD03 /* readSource.c in Sources */ = {isa = PBXBuildFile; fileRef = 19B00BB322C91F830058DD03 /* readSource.c */; };
+		19B00BB722C937940058DD03 /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 19B00BB622C937940058DD03 /* utils.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -24,7 +26,12 @@
 
 /* Begin PBXFileReference section */
 		193CB9B122B042EB00FDFD0B /* mmn14 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = mmn14; sourceTree = BUILT_PRODUCTS_DIR; };
-		193CB9B422B042EB00FDFD0B /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
+		193CB9B422B042EB00FDFD0B /* assembly.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = assembly.c; sourceTree = "<group>"; };
+		19B00BB122C91E5B0058DD03 /* assembly.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = assembly.h; sourceTree = "<group>"; };
+		19B00BB222C91F830058DD03 /* readSource.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = readSource.h; sourceTree = "<group>"; };
+		19B00BB322C91F830058DD03 /* readSource.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = readSource.c; sourceTree = "<group>"; };
+		19B00BB522C937940058DD03 /* utils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = utils.h; sourceTree = "<group>"; };
+		19B00BB622C937940058DD03 /* utils.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = utils.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,7 +64,12 @@
 		193CB9B322B042EB00FDFD0B /* mmn14 */ = {
 			isa = PBXGroup;
 			children = (
-				193CB9B422B042EB00FDFD0B /* main.c */,
+				193CB9B422B042EB00FDFD0B /* assembly.c */,
+				19B00BB122C91E5B0058DD03 /* assembly.h */,
+				19B00BB322C91F830058DD03 /* readSource.c */,
+				19B00BB222C91F830058DD03 /* readSource.h */,
+				19B00BB522C937940058DD03 /* utils.h */,
+				19B00BB622C937940058DD03 /* utils.c */,
 			);
 			path = mmn14;
 			sourceTree = "<group>";
@@ -118,7 +130,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				193CB9B522B042EB00FDFD0B /* main.c in Sources */,
+				19B00BB722C937940058DD03 /* utils.c in Sources */,
+				19B00BB422C91F830058DD03 /* readSource.c in Sources */,
+				193CB9B522B042EB00FDFD0B /* assembly.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
