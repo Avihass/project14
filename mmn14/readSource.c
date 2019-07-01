@@ -5,6 +5,7 @@
 #include "utils.h"
 
 void ignoreWhiteChar(FILE** file);
+void moveBack(FILE** file);
 
 int readFirstWord(FILE** file) {
     
@@ -24,16 +25,48 @@ int readFirstWord(FILE** file) {
     ignoreWhiteChar(&(*file));
     
     /* chek if the line is a comment */
-    if (getc(*file) == ';')
+    if (fgetc(*file) == ';')
         return in_comment;
     
     return 0;
+}
+
+void readNextWord(FILE** src, char* dest) {
+    
+    int inWord = 1;
+    char currentChar;
+    int i = 0;
+    
+    ignoreWhiteChar(&(*src));
+    
+    while (inWord) {
+        
+        currentChar = fgetc(*src);
+        
+        if (currentChar == ' ' || currentChar == '\t' || currentChar == '\n'
+            || feof(*src)) {
+            
+            inWord = 0;
+        }
+        
+        else {
+            
+            dest[i] = currentChar;
+            i++;
+        }
+    }
 }
 
 void ignoreWhiteChar(FILE** file) {
     
     while ((fgetc(*file) == ' ' || fgetc(*file) == '\t') && !feof(*file)) {
     };
+    
+    fseek(*file, -1, SEEK_CUR);
+}
+
+/* used after fgetc to go back one character */
+void moveBack(FILE** file) {
     
     fseek(*file, -1, SEEK_CUR);
 }

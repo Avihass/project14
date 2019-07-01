@@ -68,8 +68,8 @@
 				19B00BB122C91E5B0058DD03 /* assembly.h */,
 				19B00BB322C91F830058DD03 /* readSource.c */,
 				19B00BB222C91F830058DD03 /* readSource.h */,
-				19B00BB522C937940058DD03 /* utils.h */,
 				19B00BB622C937940058DD03 /* utils.c */,
+				19B00BB522C937940058DD03 /* utils.h */,
 			);
 			path = mmn14;
 			sourceTree = "<group>";

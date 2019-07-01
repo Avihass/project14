@@ -11,6 +11,7 @@ int main(int argc, const char * argv[]) {
     char srcFileName[MAX_FILE_NAME + 3];
     FILE *srcFile;
     int readedFirstWord;
+    int endOfSrc = 0;
     
     if (strlen(argv[1]) >= MAX_FILE_NAME) {
         
@@ -28,7 +29,11 @@ int main(int argc, const char * argv[]) {
         exit(0);
     }
     
-    readedFirstWord = readFirstWord(&srcFile);
+    while (!endOfSrc) {
+        
+        readedFirstWord = readFirstWord(&srcFile);
+        
+    }
     
     return 0;
 }
