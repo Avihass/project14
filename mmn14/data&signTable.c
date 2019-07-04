@@ -20,21 +20,21 @@ void signTabCtor(signTabPtr* sign) {
     *sign = &(*signTmp);
 }
 
-void addSign(signTabPtr* head, char* signStr, int type, int val) {
+void addSign(signTabPtr head, char* signStr, int type, int val) {
     
     /* if the sign table is empty */
-    if (strcmp((*head)->sign, "")) {
+    if (strcmp(head->sign, "")) {
         
-        strcpy((*head)->sign, signStr);
-        (*head)->dataType = type;
-        (*head)->value = val;
+        strcpy(head->sign, signStr);
+        head->dataType = type;
+        head->value = val;
     }
     
     else {
         
         /* create new sign */
         signTabPtr signTmp;
-        signTabPtr signIndex = (*head)->next;
+        signTabPtr signIndex = head->next;
         signTmp = (signTabPtr) malloc(sizeof(signTab));
         
         if (!signTmp)
