@@ -53,6 +53,8 @@ int readFirstWord(FILE** file) {
     return 0;
 }
 
+
+
 void readNextWord(FILE** src, char* dest) {
     
     int inWord = 1;

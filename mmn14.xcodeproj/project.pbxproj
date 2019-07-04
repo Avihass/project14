@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		193CB9B522B042EB00FDFD0B /* assembly.c in Sources */ = {isa = PBXBuildFile; fileRef = 193CB9B422B042EB00FDFD0B /* assembly.c */; };
+		194911E022CD81B300E3DB04 /* data&signTable.c in Sources */ = {isa = PBXBuildFile; fileRef = 194911DF22CD81B300E3DB04 /* data&signTable.c */; };
 		19B00BB422C91F830058DD03 /* readSource.c in Sources */ = {isa = PBXBuildFile; fileRef = 19B00BB322C91F830058DD03 /* readSource.c */; };
 		19B00BB722C937940058DD03 /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 19B00BB622C937940058DD03 /* utils.c */; };
 /* End PBXBuildFile section */
@@ -27,6 +28,8 @@
 /* Begin PBXFileReference section */
 		193CB9B122B042EB00FDFD0B /* mmn14 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = mmn14; sourceTree = BUILT_PRODUCTS_DIR; };
 		193CB9B422B042EB00FDFD0B /* assembly.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = assembly.c; sourceTree = "<group>"; };
+		194911DE22CD81B300E3DB04 /* data&signTable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "data&signTable.h"; sourceTree = "<group>"; };
+		194911DF22CD81B300E3DB04 /* data&signTable.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "data&signTable.c"; sourceTree = "<group>"; };
 		19B00BB122C91E5B0058DD03 /* assembly.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = assembly.h; sourceTree = "<group>"; };
 		19B00BB222C91F830058DD03 /* readSource.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = readSource.h; sourceTree = "<group>"; };
 		19B00BB322C91F830058DD03 /* readSource.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = readSource.c; sourceTree = "<group>"; };
@@ -70,6 +73,8 @@
 				19B00BB222C91F830058DD03 /* readSource.h */,
 				19B00BB622C937940058DD03 /* utils.c */,
 				19B00BB522C937940058DD03 /* utils.h */,
+				194911DF22CD81B300E3DB04 /* data&signTable.c */,
+				194911DE22CD81B300E3DB04 /* data&signTable.h */,
 			);
 			path = mmn14;
 			sourceTree = "<group>";
@@ -132,6 +137,7 @@
 			files = (
 				19B00BB722C937940058DD03 /* utils.c in Sources */,
 				19B00BB422C91F830058DD03 /* readSource.c in Sources */,
+				194911E022CD81B300E3DB04 /* data&signTable.c in Sources */,
 				193CB9B522B042EB00FDFD0B /* assembly.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
