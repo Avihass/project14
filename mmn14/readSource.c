@@ -34,13 +34,13 @@ int readFirstWord(FILE** file) {
     moveBack(&(*file));
     readNextWord(&(*file), word);
     
-    if (strcmp(word, ".define"))
+    if (strcmp(word, ".define") == 0)
         return in_macro;
     
-    if (strcmp(word, ".entry"))
+    if (strcmp(word, ".entry") == 0)
         return entry_line;
     
-    if (strcmp(word, ".extern"))
+    if (strcmp(word, ".extern") == 0)
         return extern_line;
     
     if (isInstruction(word))
@@ -52,8 +52,6 @@ int readFirstWord(FILE** file) {
     printError("illegal optional character");
     return 0;
 }
-
-
 
 void readNextWord(FILE** src, char* dest) {
     
@@ -83,12 +81,12 @@ void readNextWord(FILE** src, char* dest) {
 
 int isInstruction(char* word) {
     
-    if (strcmp(word, "mov") || strcmp(word, "cmp") || strcmp(word, "add") ||
-        strcmp(word, "sub") || strcmp(word, "not") || strcmp(word, "clr") ||
-        strcmp(word, "lea") || strcmp(word, "inc") || strcmp(word, "dec") ||
-        strcmp(word, "jmp") || strcmp(word, "bne") || strcmp(word, "red") ||
-        strcmp(word, "prn") || strcmp(word, "jsr") || strcmp(word, "rts") ||
-        strcmp(word, "stop")) {
+    if (strcmp(word, "mov") == 0 || strcmp(word, "cmp") == 0 || strcmp(word, "add") == 0 ||
+        strcmp(word, "sub") == 0 || strcmp(word, "not") == 0 || strcmp(word, "clr") == 0 ||
+        strcmp(word, "lea") == 0 || strcmp(word, "inc") == 0 || strcmp(word, "dec") == 0 ||
+        strcmp(word, "jmp") == 0 || strcmp(word, "bne") == 0 || strcmp(word, "red") == 0 ||
+        strcmp(word, "prn") == 0 || strcmp(word, "jsr") == 0 || strcmp(word, "rts") == 0 ||
+        strcmp(word, "stop") == 0) {
         
         return 1;
     }

@@ -23,7 +23,7 @@ void signTabCtor(signTabPtr* sign) {
 void addSign(signTabPtr head, char* signStr, int type, int val) {
     
     /* if the sign table is empty */
-    if (strcmp(head->sign, "")) {
+    if (strcmp(head->sign, "") == 0) {
         
         strcpy(head->sign, signStr);
         head->dataType = type;
@@ -56,7 +56,7 @@ void addSign(signTabPtr head, char* signStr, int type, int val) {
 
 int isAvailable(signTabPtr head, char* signStr) {
     
-    if (strcmp(head->sign, signStr))
+    if (strcmp(head->sign, signStr) == 0)
         return 0;
     
     if (head->next == NULL)
