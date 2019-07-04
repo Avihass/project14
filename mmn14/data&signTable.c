@@ -54,7 +54,13 @@ void addSign(signTabPtr* head, char* signStr, int type, int val) {
     }
 }
 
-int isAvailable(signTab st, char* signStr) {
+int isAvailable(signTabPtr head, char* signStr) {
     
-    return 0;
+    if (strcmp(head->sign, signStr))
+        return 0;
+    
+    if (head->next == NULL)
+        return 1;
+    
+    return isAvailable(head->next, signStr);
 }
