@@ -2,7 +2,7 @@
 #ifndef readSource_h
 #define readSource_h
 
-#define MAX_LINE 51
+#define MAX_LINE 80
 
 enum firstWordOpt {
   

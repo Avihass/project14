@@ -15,14 +15,14 @@ int isLegalOptChar(char* word);
 int readFirstWord(FILE** file) {
     
     int charCount = 0;
-    char word[MAX_LINE] = {};
+    char word[MAX_LINE + 1] = {};
     
     /* check if the line is not too long */
     while (fgetc(*file) != '\n' && !feof(*file)) {
         charCount++;
     }
     
-    if (charCount >= MAX_LINE)
+    if (charCount > MAX_LINE)
         printError("the line is too long");
     
     ignoreWhiteChar(&(*file));
@@ -116,12 +116,13 @@ int isLegalOptChar(char* word) {
     return 1;
 }
 
+
 void ignoreWhiteChar(FILE** file) {
     
     while ((fgetc(*file) == ' ' || fgetc(*file) == '\t') && !feof(*file)) {
     };
     
-    fseek(*file, -1, SEEK_CUR);
+    moveBack(&(*file));
 }
 
 /* used after fgetc to go back one character */

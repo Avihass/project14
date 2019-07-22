@@ -6,6 +6,7 @@
 #include "data&signTable.h"
 #include "utils.h"
 
+/* constructor for signTab pointer, allocate a node with empty values */
 void signTabCtor(signTabPtr* sign) {
     
     signTabPtr signTmp;
