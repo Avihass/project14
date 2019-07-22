@@ -6,7 +6,7 @@ int main()
 
 {
 printf("%d\n", part);
-    printf("Hello world!\n");
+    printf("Hello world! \n");
     return 0;
 }
 
