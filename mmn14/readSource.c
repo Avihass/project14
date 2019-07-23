@@ -6,11 +6,14 @@
 #include "readSource.h"
 #include "utils.h"
 
+/* private functions */
 void ignoreWhiteChar(FILE** file);
 void moveBack(FILE** file);
 void readNextWord(FILE** src, char* dest);
 int isInstruction(char* word);
 int isLegalOptChar(char* word);
+int isReserved(char* word);
+int isNumber(char* word);
 
 int readFirstWord(FILE** file) {
     
@@ -103,19 +106,98 @@ int isLegalOptChar(char* word) {
         return 0;
     
     /* check if next charcter is a letter or a digit */
-    while (word[i] != '\0') {
+    while (word[i] != ':' && word[i] != '\0') {
         
         if (!isalpha(word[i]) && !isdigit(word[i]))
             return 0;
+        
+        i++;
     }
     
     /* check if the last char is ':' */
-    if (word[i - 1] != ':')
+    if (word[i] == ':') {
+        
+        if (word[i + 1] != '\0') /* the ':' is not the last character */
+            return 0;
+    }
+    
+    else /* missing ':' */
         return 0;
     
     return 1;
 }
 
+int readMacro(FILE** file) {
+    
+    int i = 1;
+    char word[MAX_LINE] = {};
+    
+    readNextWord(&(*file), word);
+    
+    if (isReserved(word))
+        printError("the macro name is reserved");
+    
+    /* check if the first character is a letter */
+    if (!isalpha(word[0]))
+        printError("illegal macro name");
+    
+    /* check if next charcter is a letter or a digit */
+    while (word[i] != '\0') {
+        
+        if (!isalpha(word[i]) && !isdigit(word[i]))
+            printError("illegal macro name");
+    }
+    
+    readNextWord(&(*file), word);
+    
+    if (strcmp(word, "=") != 0)
+        printError("wrong macro declaration");
+    
+    readNextWord(&(*file), word);
+    
+    if (!isNumber(word))
+        printError("illegal macro value");
+    
+    ignoreWhiteChar(&(*file));
+    
+    if (fgetc(*file) != '\n' && !feof(*file))
+        printError("extra end line text");
+    
+    return 1;
+}
+
+int isReserved(char* word) {
+    
+    if (isInstruction(word))
+        return 1;
+    
+    if (strcmp(word, "r0") == 0 || strcmp(word, "r1") == 0 || strcmp(word, "r2") == 0 ||
+        strcmp(word, "r3") == 0 || strcmp(word, "r4") == 0 || strcmp(word, "r5") == 0 ||
+        strcmp(word, "r6") == 0 || strcmp(word, "r7") == 0)
+        return 1;
+    
+    return 0;
+}
+
+int isNumber(char* word){
+    
+    int i = 1;
+    
+    /* check if the first character is a digit, + ot - */
+    if (!isdigit(word[0]) && word[0] != '+' && word[0] != '-')
+        return 0;
+    
+    /* check if all charcters is a digit */
+    while (word[i] != '\0') {
+        
+        if (!isdigit(word[i]))
+            return 0;
+        
+        i++;
+    }
+    
+    return 1;
+}
 
 void ignoreWhiteChar(FILE** file) {
     
