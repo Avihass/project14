@@ -25,6 +25,7 @@ int main(int argc, const char * argv[]) {
     while (!endOfSrc) {
         
         readedFirstWord = readFirstWord(&srcFile);
+        printf("the first word is: %d\n", readedFirstWord);
         
         endOfSrc = 1;
     }

@@ -28,6 +28,7 @@ int readFirstWord(FILE** file) {
     if (charCount > MAX_LINE)
         printError("the line is too long");
     
+    rewind(*file);
     ignoreWhiteChar(&(*file));
     
     /* chek if the line is a comment */
@@ -201,8 +202,11 @@ int isNumber(char* word){
 
 void ignoreWhiteChar(FILE** file) {
     
-    while ((fgetc(*file) == ' ' || fgetc(*file) == '\t') && !feof(*file)) {
-    };
+    char currentChar;
+    
+    do {
+        currentChar = fgetc(*file);
+    }while (currentChar == ' ' || currentChar == '\t');
     
     moveBack(&(*file));
 }
