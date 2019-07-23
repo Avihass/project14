@@ -17,6 +17,7 @@ void signTabCtor(signTabPtr* sign) {
     
     /* initialize the sign name */
     strcpy(signTmp->sign, "");
+    signTmp->next = NULL;
     
     *sign = &(*signTmp);
 }
@@ -44,6 +45,7 @@ void addSign(signTabPtr head, char* signStr, int type, int val) {
         strcpy(signTmp->sign, signStr);
         signTmp->dataType = type;
         signTmp->value = val;
+        signTmp->next = NULL;
         
         /* go to end of the table */
         while (signIndex != NULL) {
@@ -64,4 +66,14 @@ int isAvailable(signTabPtr head, char* signStr) {
         return 1;
     
     return isAvailable(head->next, signStr);
+}
+
+void freeSignTab(signTabPtr head) {
+    
+    free(head);
+    
+    if (head->next == NULL)
+        return;
+        
+    return freeSignTab(head->next);
 }

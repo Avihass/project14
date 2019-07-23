@@ -63,6 +63,12 @@ void readNextWord(FILE** src, char* dest) {
     char currentChar;
     int i = 0;
     
+    /* reset the destination string */
+    for (i = 0; dest[i] != '\0'; i++) {
+        dest[i] = '\0';
+    }
+    
+    i = 0;
     ignoreWhiteChar(&(*src));
     
     while (inWord) {
@@ -128,10 +134,11 @@ int isLegalOptChar(char* word) {
     return 1;
 }
 
-int readMacro(FILE** file) {
+int readMacro(FILE** file, char* macroName) {
     
     int i = 1;
     char word[MAX_LINE] = {};
+    int macroVal;
     
     readNextWord(&(*file), word);
     
@@ -143,11 +150,13 @@ int readMacro(FILE** file) {
         printError("illegal macro name");
     
     /* check if next charcter is a letter or a digit */
-    while (word[i] != '\0') {
+    for (i = 1; word[i] != '\0'; i++) {
         
         if (!isalpha(word[i]) && !isdigit(word[i]))
             printError("illegal macro name");
     }
+    
+    strcpy(macroName, word);
     
     readNextWord(&(*file), word);
     
@@ -164,7 +173,9 @@ int readMacro(FILE** file) {
     if (fgetc(*file) != '\n' && !feof(*file))
         printError("extra end line text");
     
-    return 1;
+    macroVal = atoi(word);
+    
+    return macroVal;
 }
 
 int isReserved(char* word) {
@@ -184,7 +195,7 @@ int isNumber(char* word){
     
     int i = 1;
     
-    /* check if the first character is a digit, + ot - */
+    /* check if the first character is a digit, '+' or '-' */
     if (!isdigit(word[0]) && word[0] != '+' && word[0] != '-')
         return 0;
     

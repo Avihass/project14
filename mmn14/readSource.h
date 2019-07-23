@@ -10,6 +10,6 @@ enum firstWordOpt {
 };
 
 int readFirstWord(FILE** file);
-int readMacro(FILE** file);
+int readMacro(FILE** file, char* macroName);
 
 #endif /* readSource_h */
