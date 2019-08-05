@@ -13,7 +13,7 @@ typedef struct signTable {
 
 enum signType {
     
-    macro_type
+    macro_sign, code_sign, data_sign
 };
 
 void signTabCtor(signTabPtr* sign); /* construct a first node in a signTabPtr */

@@ -5,38 +5,61 @@
 #include <ctype.h>
 #include "readSource.h"
 #include "utils.h"
+#include "assembly.h"
 
 /* private functions */
 void ignoreWhiteChar(FILE** file);
 void moveBack(FILE** file);
-void readNextWord(FILE** src, char* dest);
-int isInstruction(char* word);
+void readNextWord(FILE** src, char* dest, char charLimit);
 int isLegalOptChar(char* word);
 int isReserved(char* word);
 int isNumber(char* word);
+int islegalMacroName(char* macroName);
 
-int readFirstWord(FILE** file) {
+int readFirstWord(FILE** file, char* readedWord) {
     
     int charCount = 0;
     char word[MAX_LINE + 1] = {};
+    fpos_t lineBegining;
+    char readedChar;
+    
+    fgetpos(*file, &lineBegining);
     
     /* check if the line is not too long */
     while (fgetc(*file) != '\n' && !feof(*file)) {
         charCount++;
     }
     
-    if (charCount > MAX_LINE)
-        printError("the line is too long");
+    if (charCount > MAX_LINE) {
+        
+        printErrorInSrcFile("the line is too long");
+        return 0;
+    }
+
+    fsetpos(*file, &lineBegining);
     
-    rewind(*file);
     ignoreWhiteChar(&(*file));
     
+    /* move forward to check EOF */
+    fseek(*file, 1, SEEK_CUR);
+    readedChar = fgetc(*file);
+    
+    if (readedChar == EOF)
+        return end_src_file;
+    
+    fsetpos(*file, &lineBegining);
+    readedChar = fgetc(*file);
+    
+    if (readedChar == '\n')
+        return blank_line;
+    
     /* chek if the line is a comment */
-    if (fgetc(*file) == ';')
+    if (readedChar == ';')
         return in_comment;
     
     moveBack(&(*file));
-    readNextWord(&(*file), word);
+    
+    readNextWord(&(*file), word, '\0');
     
     if (strcmp(word, ".define") == 0)
         return in_macro;
@@ -47,17 +70,26 @@ int readFirstWord(FILE** file) {
     if (strcmp(word, ".extern") == 0)
         return extern_line;
     
-    if (isInstruction(word))
+    if (identifyInstruction(word) != -1) {
+        
+        strcpy(readedWord, word);
         return instruction_line;
+    }
     
-    if (isLegalOptChar(word))
+    if (isLegalOptChar(word)) {
+        
+        strcpy(readedWord, word);
         return optional_char;
+    }
     
-    printError("illegal optional character");
-    return 0;
+    printErrorInSrcFile("illegal optional character");
+    return -1;
 }
 
-void readNextWord(FILE** src, char* dest) {
+/* the function stop to read when we read ' ' (space), '\t' or eof and
+   receive charLimit in parameter for stop read when we read another
+   character, we can send '\0' if there is no specifie character */
+void readNextWord(FILE** src, char* dest, char charLimit) {
     
     int inWord = 1;
     char currentChar;
@@ -76,7 +108,7 @@ void readNextWord(FILE** src, char* dest) {
         currentChar = fgetc(*src);
         
         if (currentChar == ' ' || currentChar == '\t' || currentChar == '\n'
-            || feof(*src)) {
+            || currentChar == charLimit || feof(*src)) {
             
             inWord = 0;
         }
@@ -89,42 +121,80 @@ void readNextWord(FILE** src, char* dest) {
     }
 }
 
-int isInstruction(char* word) {
+int identifyInstruction(char* word) {
     
-    if (strcmp(word, "mov") == 0 || strcmp(word, "cmp") == 0 || strcmp(word, "add") == 0 ||
-        strcmp(word, "sub") == 0 || strcmp(word, "not") == 0 || strcmp(word, "clr") == 0 ||
-        strcmp(word, "lea") == 0 || strcmp(word, "inc") == 0 || strcmp(word, "dec") == 0 ||
-        strcmp(word, "jmp") == 0 || strcmp(word, "bne") == 0 || strcmp(word, "red") == 0 ||
-        strcmp(word, "prn") == 0 || strcmp(word, "jsr") == 0 || strcmp(word, "rts") == 0 ||
-        strcmp(word, "stop") == 0) {
-        
-        return 1;
-    }
+    if (strcmp(word, "mov") == 0)
+        return inst_mov;
     
-    return 0;
+    if (strcmp(word, "cmp") == 0)
+        return inst_cmp;
+    
+    if (strcmp(word, "add") == 0)
+        return inst_add;
+    
+    if (strcmp(word, "sub") == 0)
+        return inst_sub;
+    
+    if (strcmp(word, "not") == 0)
+        return inst_not;
+    
+    if (strcmp(word, "clr") == 0)
+        return inst_clr;
+    
+    if (strcmp(word, "lea") == 0)
+        return inst_lea;
+    
+    if (strcmp(word, "inc") == 0)
+        return inst_inc;
+    
+    if (strcmp(word, "dec") == 0)
+        return inst_dec;
+    
+    if (strcmp(word, "jmp") == 0)
+        return inst_jmp;
+    
+    if (strcmp(word, "bne") == 0)
+        return inst_bne;
+    
+    if (strcmp(word, "red") == 0)
+        return inst_red;
+    
+    if (strcmp(word, "prn") == 0)
+        return inst_prn;
+    
+    if (strcmp(word, "jsr") == 0)
+        return inst_jsr;
+    
+    if (strcmp(word, "rts") == 0)
+        return inst_rts;
+    
+    if (strcmp(word, "stop") == 0)
+        return inst_stop;
+    
+    return -1;
 }
 
-int isLegalOptChar(char* word) {
+int isLegalOptChar(char* optCharName) {
     
     int i = 1;
     
     /* check if the first character is a letter */
-    if (!isalpha(word[0]))
+    if (!isalpha(optCharName[0]))
         return 0;
     
     /* check if next charcter is a letter or a digit */
-    while (word[i] != ':' && word[i] != '\0') {
+    while (optCharName[i] != ':' && optCharName[i] != '\0') {
         
-        if (!isalpha(word[i]) && !isdigit(word[i]))
+        if (!isalpha(optCharName[i]) && !isdigit(optCharName[i]))
             return 0;
         
         i++;
     }
     
     /* check if the last char is ':' */
-    if (word[i] == ':') {
+    if (optCharName[i] == ':') {
         
-        if (word[i + 1] != '\0') /* the ':' is not the last character */
+        if (optCharName[i + 1] != '\0') /* the ':' is not the last character */
             return 0;
     }
     
@@ -136,51 +206,128 @@ int isLegalOptChar(char* word) {
 
 int readMacro(FILE** file, char* macroName) {
     
-    int i = 1;
     char word[MAX_LINE] = {};
     int macroVal;
     
-    readNextWord(&(*file), word);
+    readNextWord(&(*file), word, '\0');
     
     if (isReserved(word))
-        printError("the macro name is reserved");
+        printErrorInSrcFile("the macro name is reserved");
     
-    /* check if the first character is a letter */
-    if (!isalpha(word[0]))
-        printError("illegal macro name");
-    
-    /* check if next charcter is a letter or a digit */
-    for (i = 1; word[i] != '\0'; i++) {
-        
-        if (!isalpha(word[i]) && !isdigit(word[i]))
-            printError("illegal macro name");
+    if (!islegalMacroName(word)) {
+        printErrorInSrcFile("illegal macro name");
     }
     
     strcpy(macroName, word);
     
-    readNextWord(&(*file), word);
+    readNextWord(&(*file), word, '\0');
     
     if (strcmp(word, "=") != 0)
-        printError("wrong macro declaration");
+        printErrorInSrcFile("wrong macro declaration");
     
-    readNextWord(&(*file), word);
+    if (!haveError) {
+        
+        readNextWord(&(*file), word, '\0');
+        
+        if (!isNumber(word))
+            printErrorInSrcFile("illegal macro value");
+        
+        ignoreWhiteChar(&(*file));
+        
+        if (fgetc(*file) != '\n' && !feof(*file))
+            printErrorInSrcFile("extra end line text");
+    }
     
-    if (!isNumber(word))
-        printError("illegal macro value");
+    if (haveError)
+        macroVal = 0;
     
-    ignoreWhiteChar(&(*file));
-    
-    if (fgetc(*file) != '\n' && !feof(*file))
-        printError("extra end line text");
-    
-    macroVal = atoi(word);
+    else
+        macroVal = atoi(word);
     
     return macroVal;
 }
 
+int islegalMacroName(char* macroName) {
+    
+    int i;
+    
+    /* check if the first character is a letter */
+    if (!isalpha(macroName[0]))
+        return 0;
+        
+        /* check if next charcter is a letter or a digit */
+    for (i = 1; macroName[i] != '\0'; i++) {
+            
+        if (!isalpha(macroName[i]) && !isdigit(macroName[i]))
+            return 0;
+    }
+    
+    return 1;
+}
+
+instructField readInstruction(FILE** file, char* instructName, int instructType) {
+    
+    instructField instruction;
+    char actualChar;
+    char readedWord[MAX_LINE];
+    
+    if (strcmp(instructName, "") != 0)
+        strcpy(instruction.name, instructName);
+    
+    else
+        strcpy(instruction.name, "");
+    
+    instruction.type = instructType;
+    
+    /* the instruction there should have source operand */
+    if (instructType == inst_mov || instructType == inst_cmp || instructType == inst_add ||
+        instructType == inst_sub || instructType == inst_lea) {
+        
+        /* read source operand method */
+        ignoreWhiteChar(&(*file));
+        actualChar = fgetc(*file);
+        
+        if (actualChar == '#') {
+            
+            readNextWord(&(*file), readedWord, ',');
+            
+            if (!isNumber(readedWord)) {
+                
+                if (!islegalMacroName(readedWord))
+                    printErrorInSrcFile("imediate value is not a valid number or macro name");
+                
+                /* the value is a macro */
+                if (!haveError) {
+                    instruction.srcOp.type =  imediate_met;
+                    instruction.srcOp.val = 0;
+                    strcpy(instruction.srcOp.macroName, readedWord);
+                    instruction.ARE = 0;
+                }
+            }
+            
+            /* the value is a number */
+            else {
+                
+                instruction.srcOp.type =  imediate_met;
+                instruction.srcOp.val = atoi(readedWord);
+                strcpy(instruction.srcOp.macroName, "");
+                instruction.ARE = 0;
+            }
+        }
+        
+        else if (actualChar == 'r') {
+            
+            readNextWord(&(*file), readedWord, ',');
+            
+        }
+    }
+    
+    return instruction;
+}
+
 int isReserved(char* word) {
     
-    if (isInstruction(word))
+    if (identifyInstruction(word))
         return 1;
     
     if (strcmp(word, "r0") == 0 || strcmp(word, "r1") == 0 || strcmp(word, "r2") == 0 ||
@@ -226,4 +373,16 @@ void ignoreWhiteChar(FILE** file) {
 void moveBack(FILE** file) {
     
     fseek(*file, -1, SEEK_CUR);
+}
+
+void mvToNextLine(FILE** file) {
+    
+    char readedChar;
+    
+    do {
+        
+        readedChar = fgetc(*file);
+    }while (readedChar != '\n' && readedChar != EOF);
+    
+        
 }

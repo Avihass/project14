@@ -2,6 +2,9 @@
 #ifndef utils_h
 #define utils_h
 
-void printError(char* ErrorMessage); /* print the error message and quit the programme */
+extern int haveError;
 
+void printError(char* ErrorMessage); /* print the error message */
+void printErrorInSrcFile(char* ErrorMessage); /* print error message and the line in the file */
+void printErrorAndStop(char* ErrorMessage); /* print the error message and quit the programme */
 #endif /* utils_h */
