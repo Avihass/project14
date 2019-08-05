@@ -1,0 +1,6 @@
+# depslib dependency file v1.0
+1565017746 source:/home/harel/Desktop/binaryTest/main.c
+	<stdio.h>
+	<string.h>
+	<stdlib.h>
+
