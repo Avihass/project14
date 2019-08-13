@@ -10,11 +10,13 @@
 /* private functions */
 void ignoreWhiteChar(FILE** file);
 void moveBack(FILE** file);
+void moveWordBack(FILE** file);
 void readNextWord(FILE** src, char* dest, char charLimit);
 int isLegalOptChar(char* word);
 int isReserved(char* word);
 int isNumber(char* word);
 int islegalMacroName(char* macroName);
+adOperand readOperand(FILE** file, int isSrcOp);
 
 int readFirstWord(FILE** file, char* readedWord) {
     
@@ -269,7 +271,6 @@ instructField readInstruction(FILE** file, char* instructName, int instructType)
     
     instructField instruction;
     char actualChar;
-    char readedWord[MAX_LINE];
     
     if (strcmp(instructName, "") != 0)
         strcpy(instruction.name, instructName);
@@ -283,46 +284,215 @@ instructField readInstruction(FILE** file, char* instructName, int instructType)
     if (instructType == inst_mov || instructType == inst_cmp || instructType == inst_add ||
         instructType == inst_sub || instructType == inst_lea) {
         
-        /* read source operand method */
+        instruction.srcOp = readOperand(&(*file), 1);
+        
+        if (instruction.type == inst_lea && (instruction.srcOp.type == imediate_met ||
+                                             instruction.srcOp.type == register_met)) {
+            
+            printErrorInSrcFile("the imediate and register source operand methode are illegal with 'lea' instruction");
+        }
+        
+        /* check if there is not a destination */
         ignoreWhiteChar(&(*file));
         actualChar = fgetc(*file);
         
-        if (actualChar == '#') {
+        if (actualChar == '\n') {
             
-            readNextWord(&(*file), readedWord, ',');
-            
-            if (!isNumber(readedWord)) {
-                
-                if (!islegalMacroName(readedWord))
-                    printErrorInSrcFile("imediate value is not a valid number or macro name");
-                
-                /* the value is a macro */
-                if (!haveError) {
-                    instruction.srcOp.type =  imediate_met;
-                    instruction.srcOp.val = 0;
-                    strcpy(instruction.srcOp.macroName, readedWord);
-                    instruction.ARE = 0;
-                }
-            }
-            
-            /* the value is a number */
-            else {
-                
-                instruction.srcOp.type =  imediate_met;
-                instruction.srcOp.val = atoi(readedWord);
-                strcpy(instruction.srcOp.macroName, "");
-                instruction.ARE = 0;
-            }
+            printErrorInSrcFile("expected destination operand");
+            moveBack(&(*file));
         }
         
-        else if (actualChar == 'r') {
+        else if (actualChar != ',')
+            printErrorInSrcFile("missing coma after the source operand");
+    }
+    
+    if (!haveError && instructType != inst_rts && instructType != inst_stop) {
+        
+        instruction.destOp = readOperand(&(*file), 0);
+        
+        if (instruction.destOp.type == imediate_met && instructType != inst_cmp && instructType != inst_prn)
+            printErrorInSrcFile("the imediate operand method is illegal with your instruction");
+        
+        if (instruction.destOp.type == index_met && (instructType == inst_jmp ||
+                                                     instructType == inst_bne ||
+                                                     instructType == inst_jsr)) {
             
-            readNextWord(&(*file), readedWord, ',');
-            
+            printErrorInSrcFile("the index operand method is illegal with your instruction");
         }
     }
     
+    if (!haveError) {
+        
+        ignoreWhiteChar(&(*file));
+        actualChar = fgetc(*file);
+        
+        if (actualChar != '\n')
+            printErrorInSrcFile("extra end text");
+        
+        moveBack(&(*file));
+    }
+    
     return instruction;
+}
+
+adOperand readOperand(FILE** file, int isSrcOp) {
+    
+    adOperand operand;
+    char actualChar;
+    char readedWord[MAX_LINE];
+    int tmp;
+    
+    ignoreWhiteChar(&(*file));
+    actualChar = fgetc(*file);
+    
+    /* initialize operand */
+    operand.type = 0;
+    operand.val = 0;
+    strcpy(operand.macroName, "");
+    
+    if (actualChar == '\n') {
+        
+        if (isSrcOp)
+            printErrorInSrcFile("missing source and destination operand");
+        
+        else
+            printErrorInSrcFile("missing destination operand");
+        
+        moveBack(&(*file));
+    }
+    
+    else if (actualChar == '#') {
+        
+        if (isSrcOp)
+            readNextWord(&(*file), readedWord, ',');
+        
+        else
+            readNextWord(&(*file), readedWord, '\0');
+        
+        if (!isNumber(readedWord)) {
+            
+            if (!islegalMacroName(readedWord))
+                printErrorInSrcFile("imediate value is not a valid number or macro name");
+            
+            /* the value is a macro */
+            if (!haveError) {
+                operand.type = imediate_met;
+                strcpy(operand.macroName, readedWord);
+            }
+        }
+        
+        /* the value is a number */
+        else {
+            
+            operand.type = imediate_met;
+            operand.val = atoi(readedWord);
+        }
+    }
+    
+    else if (isalpha(actualChar)) {
+        
+        int isRegister = 0, OpIsReaded = 0;
+        
+        if (actualChar == 'r') {
+            
+            if (isSrcOp)
+                readNextWord(&(*file), readedWord, ',');
+            
+            else
+                readNextWord(&(*file), readedWord, '\0');
+            
+            OpIsReaded = 1;
+            
+            if (strlen(readedWord) == 1) {
+                
+                tmp = atoi(readedWord);
+                
+                /* if true: the source operand is a register */
+                if (strcmp(readedWord, "0") == 0 || (tmp >= 1 && tmp <= 7)) {
+                    
+                    isRegister = 1;
+                    operand.type = register_met;
+                    operand.val = tmp;
+                }
+            }
+        }
+        
+        if (!isRegister) {
+            
+            char *indexStr;
+            
+            if (OpIsReaded)
+                moveWordBack(&(*file));
+            
+            if (isSrcOp)
+                readNextWord(&(*file), readedWord, ',');
+            
+            else
+                readNextWord(&(*file), readedWord, '\0');
+            
+            /* check if ']' is in the word */
+            indexStr = strchr(readedWord, ']');
+            
+            if (indexStr != NULL) {
+                
+                /* erase the close brackets to check the number inside */
+                *indexStr = '\0';
+                
+                /* check if ']' is in the word */
+                indexStr = strchr(readedWord, '[');
+                
+                if (indexStr != NULL) {
+                    
+                    /* erase the '[' in the word for get the name of the
+                     optional character */
+                    *indexStr = '\0';
+                    
+                    /* move indexStr inside the brackets */
+                    indexStr = indexStr + 1;
+                    
+                    if (isNumber(indexStr)) {
+                        
+                        tmp = atoi(indexStr);
+                        
+                        if (tmp < 0)
+                            printErrorInSrcFile("invalid index number");
+                        
+                        else {
+                            
+                            operand.type = index_met;
+                            operand.val = tmp;
+                            strcpy(operand.macroName, readedWord);
+                        }
+                    }
+                    
+                    else if (islegalMacroName(indexStr)) {
+                        
+                        operand.type = index_met;
+                        strcpy(operand.macroName, readedWord);
+                        strcpy(operand.indexName, indexStr);
+                    }
+                    
+                    else
+                        printErrorInSrcFile("illegal index name");
+                }
+                
+                else
+                    printErrorInSrcFile("illegal optional character name");
+            }
+            
+            else if (islegalMacroName(readedWord)) {
+                
+                operand.type = direct_met;
+                strcpy(operand.macroName, readedWord);
+            }
+        }
+        
+        else
+            printErrorInSrcFile("illegal optional character name");
+        
+    } /* end of: else if (isalpha(actualChar)) */
+    
+    return operand;
 }
 
 int isReserved(char* word) {
@@ -363,6 +533,7 @@ void ignoreWhiteChar(FILE** file) {
     char currentChar;
     
     do {
+        
         currentChar = fgetc(*file);
     }while (currentChar == ' ' || currentChar == '\t');
     
@@ -375,9 +546,30 @@ void moveBack(FILE** file) {
     fseek(*file, -1, SEEK_CUR);
 }
 
+/* move to a word begining */
+void moveWordBack(FILE** file) {
+    
+    int beginPoint = 0;
+    int actualChar;
+    
+    do {
+        
+        moveBack(&(*file));
+        actualChar = fgetc(*file);
+        
+        if (actualChar == ' ' || actualChar == '\t' || actualChar == '\n')
+            beginPoint = 1;
+        
+        moveBack(&(*file));
+    }while (!beginPoint);
+    
+    /* move to word begining char */
+    fgetc(*file);
+}
+
 void mvToNextLine(FILE** file) {
     
-    char readedChar;
+    int readedChar;
     
     do {
         

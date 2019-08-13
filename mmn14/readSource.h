@@ -28,6 +28,7 @@ typedef struct AdressOperand {
     int type;
     int val;
     char macroName[MAX_LINE];
+    char indexName[MAX_LINE];
 } adOperand;
 
 typedef struct instructionField {

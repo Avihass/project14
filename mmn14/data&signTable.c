@@ -13,7 +13,7 @@ void signTabCtor(signTabPtr* sign) {
     signTmp = (signTabPtr) malloc(sizeof(signTab));
     
     if (!signTmp)
-        printError("can't allocate memory");
+        printErrorAndStop("can't allocate memory");
     
     /* initialize the sign name */
     strcpy(signTmp->sign, "");
@@ -40,7 +40,7 @@ void addSign(signTabPtr head, char* signStr, int type, int val) {
         signTmp = (signTabPtr) malloc(sizeof(signTab));
         
         if (!signTmp)
-            printError("can't allocate memory");
+            printErrorAndStop("can't allocate memory");
         
         strcpy(signTmp->sign, signStr);
         signTmp->dataType = type;
