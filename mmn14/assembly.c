@@ -61,10 +61,15 @@ int main(int argc, const char * argv[]) {
             instructType = identifyInstruction(readedFirstWord);
             actualInstruct = readInstruction(&srcFile, "", instructType);
             
-            printf("%d\n", actualInstruct.type);
-            printf("%d\n", actualInstruct.srcOp.type);
-            printf("%d\n", actualInstruct.srcOp.val);
-            printf("%d\n", actualInstruct.ARE);
+            printf("instruct type: %d\n", actualInstruct.type);
+            printf("\nsource operand type: %d\n", actualInstruct.srcOp.type);
+            printf("source operand value: %d\n", actualInstruct.srcOp.val);
+            printf("source operand name: %s\n", actualInstruct.srcOp.macroName);
+            printf("source operand name: %s\n", actualInstruct.srcOp.indexName);
+            printf("\ndestination operand type: %d\n", actualInstruct.destOp.type);
+            printf("destination operand value: %d\n", actualInstruct.destOp.val);
+            printf("destination operand name: %s\n", actualInstruct.destOp.macroName);
+            printf("destination operand name: %s\n", actualInstruct.destOp.indexName);
             
             mvToNextLine(&srcFile);
         }

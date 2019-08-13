@@ -10,7 +10,7 @@
 /* private functions */
 void ignoreWhiteChar(FILE** file);
 void moveBack(FILE** file);
-void moveWordBack(FILE** file);
+void moveWordBack(FILE** file, char charLimit);
 void readNextWord(FILE** src, char* dest, char charLimit);
 int isLegalOptChar(char* word);
 int isReserved(char* word);
@@ -113,6 +113,7 @@ void readNextWord(FILE** src, char* dest, char charLimit) {
             || currentChar == charLimit || feof(*src)) {
             
             inWord = 0;
+            moveBack(&(*src));
         }
         
         else {
@@ -421,14 +422,17 @@ adOperand readOperand(FILE** file, int isSrcOp) {
             
             char *indexStr;
             
-            if (OpIsReaded)
-                moveWordBack(&(*file));
-            
-            if (isSrcOp)
+            if (isSrcOp) {
+                
+                moveWordBack(&(*file), '\0');
                 readNextWord(&(*file), readedWord, ',');
+            }
             
-            else
+            else {
+                
+                moveWordBack(&(*file), ',');
                 readNextWord(&(*file), readedWord, '\0');
+            }
             
             /* check if ']' is in the word */
             indexStr = strchr(readedWord, ']');
@@ -547,7 +551,7 @@ void moveBack(FILE** file) {
 }
 
 /* move to a word begining */
-void moveWordBack(FILE** file) {
+void moveWordBack(FILE** file, char charLimit) {
     
     int beginPoint = 0;
     int actualChar;
@@ -557,7 +561,7 @@ void moveWordBack(FILE** file) {
         moveBack(&(*file));
         actualChar = fgetc(*file);
         
-        if (actualChar == ' ' || actualChar == '\t' || actualChar == '\n')
+        if (actualChar == ' ' || actualChar == '\t' || actualChar == '\n' || actualChar == charLimit)
             beginPoint = 1;
         
         moveBack(&(*file));
