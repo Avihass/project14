@@ -65,11 +65,11 @@ int main(int argc, const char * argv[]) {
             printf("\nsource operand type: %d\n", actualInstruct.srcOp.type);
             printf("source operand value: %d\n", actualInstruct.srcOp.val);
             printf("source operand name: %s\n", actualInstruct.srcOp.macroName);
-            printf("source operand name: %s\n", actualInstruct.srcOp.indexName);
+            printf("source operand index name: %s\n", actualInstruct.srcOp.indexName);
             printf("\ndestination operand type: %d\n", actualInstruct.destOp.type);
             printf("destination operand value: %d\n", actualInstruct.destOp.val);
             printf("destination operand name: %s\n", actualInstruct.destOp.macroName);
-            printf("destination operand name: %s\n", actualInstruct.destOp.indexName);
+            printf("destination operand index name: %s\n", actualInstruct.destOp.indexName);
             
             mvToNextLine(&srcFile);
         }

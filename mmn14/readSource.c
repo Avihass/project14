@@ -113,7 +113,9 @@ void readNextWord(FILE** src, char* dest, char charLimit) {
             || currentChar == charLimit || feof(*src)) {
             
             inWord = 0;
-            moveBack(&(*src));
+            
+            if (!feof(*src))
+                moveBack(&(*src));
         }
         
         else {
@@ -327,10 +329,11 @@ instructField readInstruction(FILE** file, char* instructName, int instructType)
         ignoreWhiteChar(&(*file));
         actualChar = fgetc(*file);
         
-        if (actualChar != '\n')
+        if (actualChar != '\n' && !feof(*file))
             printErrorInSrcFile("extra end text");
         
-        moveBack(&(*file));
+        if (!feof(*file))
+            moveBack(&(*file));
     }
     
     return instruction;
@@ -490,11 +493,10 @@ adOperand readOperand(FILE** file, int isSrcOp) {
                 strcpy(operand.macroName, readedWord);
             }
         }
-        
-        else
-            printErrorInSrcFile("illegal optional character name");
-        
     } /* end of: else if (isalpha(actualChar)) */
+    
+    else
+        printErrorInSrcFile("illegal optional character name");
     
     return operand;
 }
@@ -539,9 +541,10 @@ void ignoreWhiteChar(FILE** file) {
     do {
         
         currentChar = fgetc(*file);
-    }while (currentChar == ' ' || currentChar == '\t');
+    }while (currentChar == ' ' || currentChar == '\t' || currentChar == '\n');
     
-    moveBack(&(*file));
+    if (!feof(*file))
+        moveBack(&(*file));
 }
 
 /* used after fgetc to go back one character */
