@@ -40,18 +40,11 @@ int readFirstWord(FILE** file, char* readedWord) {
     }
 
     fsetpos(*file, &lineBegining);
-    
     ignoreWhiteChar(&(*file));
-    
-    /* move forward to check EOF */
-    fseek(*file, 1, SEEK_CUR);
     readedChar = fgetc(*file);
     
     if (readedChar == EOF)
         return end_src_file;
-    
-    fsetpos(*file, &lineBegining);
-    readedChar = fgetc(*file);
     
     if (readedChar == '\n') {
         

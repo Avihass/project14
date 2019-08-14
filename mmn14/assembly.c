@@ -81,7 +81,7 @@ int main(int argc, const char * argv[]) {
             haveErrorInLine = 0;
         }
         
-        else if (firstWordType == blank_line) {
+        else if (firstWordType == blank_line || firstWordType == in_comment) {
             mvToNextLine(&srcFile);
             actLineInSrc++;
         }
