@@ -7,6 +7,9 @@
 #include "data&signTable.h"
 #include "utils.h"
 
+/* the actual line in source file number */
+int actLineInSrc = 1;
+
 int main(int argc, const char * argv[]) {
     
     char srcFileName[MAX_FILE_NAME + 3];
@@ -40,10 +43,10 @@ int main(int argc, const char * argv[]) {
             
             macroVal = readMacro(&srcFile, macroName);
             
-            if (!haveError) {
+            if (!haveErrorInLine) {
                 
                 if (!isAvailable(signTabHead, macroName))
-                    printError("the macro name is not available");
+                    printErrorInSrcFile("the macro name is not available");
             }
             
             if (!haveError) {
@@ -54,6 +57,8 @@ int main(int argc, const char * argv[]) {
             }
             
             mvToNextLine(&srcFile);
+            actLineInSrc++;
+            haveErrorInLine = 0;
         }
         
         else if (firstWordType == instruction_line) {
@@ -72,10 +77,13 @@ int main(int argc, const char * argv[]) {
             printf("destination operand index name: %s\n", actualInstruct.destOp.indexName);
             
             mvToNextLine(&srcFile);
+            actLineInSrc++;
+            haveErrorInLine = 0;
         }
         
         else if (firstWordType == blank_line) {
             mvToNextLine(&srcFile);
+            actLineInSrc++;
         }
         
         else if (firstWordType == end_src_file) {
@@ -87,4 +95,5 @@ int main(int argc, const char * argv[]) {
     
     return 0;
 }
+
 

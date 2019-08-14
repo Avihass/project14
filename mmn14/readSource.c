@@ -17,6 +17,7 @@ int isReserved(char* word);
 int isNumber(char* word);
 int islegalMacroName(char* macroName);
 adOperand readOperand(FILE** file, int isSrcOp);
+void resetInstruct(instructField* instruction);
 
 int readFirstWord(FILE** file, char* readedWord) {
     
@@ -52,8 +53,11 @@ int readFirstWord(FILE** file, char* readedWord) {
     fsetpos(*file, &lineBegining);
     readedChar = fgetc(*file);
     
-    if (readedChar == '\n')
+    if (readedChar == '\n') {
+        
+        moveBack(&(*file));
         return blank_line;
+    }
     
     /* chek if the line is a comment */
     if (readedChar == ';')
@@ -230,7 +234,7 @@ int readMacro(FILE** file, char* macroName) {
     if (strcmp(word, "=") != 0)
         printErrorInSrcFile("wrong macro declaration");
     
-    if (!haveError) {
+    if (!haveErrorInLine) {
         
         readNextWord(&(*file), word, '\0');
         
@@ -243,7 +247,7 @@ int readMacro(FILE** file, char* macroName) {
             printErrorInSrcFile("extra end line text");
     }
     
-    if (haveError)
+    if (haveErrorInLine)
         macroVal = 0;
     
     else
@@ -273,6 +277,8 @@ int islegalMacroName(char* macroName) {
 instructField readInstruction(FILE** file, char* instructName, int instructType) {
     
     instructField instruction;
+    resetInstruct(&instruction);
+    
     char actualChar;
     
     if (strcmp(instructName, "") != 0)
@@ -309,12 +315,15 @@ instructField readInstruction(FILE** file, char* instructName, int instructType)
             printErrorInSrcFile("missing coma after the source operand");
     }
     
-    if (!haveError && instructType != inst_rts && instructType != inst_stop) {
+    if (!haveErrorInLine && instructType != inst_rts && instructType != inst_stop) {
         
         instruction.destOp = readOperand(&(*file), 0);
         
-        if (instruction.destOp.type == imediate_met && instructType != inst_cmp && instructType != inst_prn)
+        if (instruction.destOp.type == imediate_met && instructType != inst_cmp &&
+            instructType != inst_prn && !haveError) {
+            
             printErrorInSrcFile("the imediate operand method is illegal with your instruction");
+        }
         
         if (instruction.destOp.type == index_met && (instructType == inst_jmp ||
                                                      instructType == inst_bne ||
@@ -324,7 +333,7 @@ instructField readInstruction(FILE** file, char* instructName, int instructType)
         }
     }
     
-    if (!haveError) {
+    if (!haveErrorInLine) {
         
         ignoreWhiteChar(&(*file));
         actualChar = fgetc(*file);
@@ -379,7 +388,7 @@ adOperand readOperand(FILE** file, int isSrcOp) {
                 printErrorInSrcFile("imediate value is not a valid number or macro name");
             
             /* the value is a macro */
-            if (!haveError) {
+            if (!haveErrorInLine) {
                 operand.type = imediate_met;
                 strcpy(operand.macroName, readedWord);
             }
@@ -518,8 +527,15 @@ int isNumber(char* word){
     
     int i = 1;
     
-    /* check if the first character is a digit, '+' or '-' */
-    if (!isdigit(word[0]) && word[0] != '+' && word[0] != '-')
+    /* check if the first character is '+' or '-' and return 0 if there is no
+       number after the '+' or '-' */
+    if (word[0] == '+' || word[0] == '-') {
+        
+        if (!isdigit(word[1]))
+            return 0;
+    }
+    
+    else if (!isdigit(word[0]))
         return 0;
     
     /* check if all charcters is a digit */
@@ -541,7 +557,7 @@ void ignoreWhiteChar(FILE** file) {
     do {
         
         currentChar = fgetc(*file);
-    }while (currentChar == ' ' || currentChar == '\t' || currentChar == '\n');
+    }while (currentChar == ' ' || currentChar == '\t');
     
     if (!feof(*file))
         moveBack(&(*file));
@@ -584,4 +600,19 @@ void mvToNextLine(FILE** file) {
     }while (readedChar != '\n' && readedChar != EOF);
     
         
+}
+
+void resetInstruct(instructField* instruction) {
+    
+    strcpy(instruction->name, "");
+    instruction->type = 0;
+    instruction->srcOp.type = 0;
+    instruction->srcOp.val = 0;
+    strcpy(instruction->srcOp.macroName, "");
+    strcpy(instruction->srcOp.indexName, "");
+    instruction->destOp.type = 0;
+    instruction->destOp.val = 0;
+    strcpy(instruction->destOp.macroName, "");
+    strcpy(instruction->destOp.indexName, "");
+    instruction->ARE = 0;
 }

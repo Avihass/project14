@@ -2,8 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "utils.h"
+#include "assembly.h"
 
 int haveError = 0;
+int haveErrorInLine = 0;
 
 void printError(char* ErrorMessage) {
     
@@ -15,7 +17,8 @@ void printError(char* ErrorMessage) {
 void printErrorInSrcFile(char* ErrorMessage) {
     
     printError(ErrorMessage);
-    /* the line */
+    haveErrorInLine = 1;
+    printf("(at the line: %d)\n\n", actLineInSrc);
 }
 
 void printErrorAndStop(char* ErrorMessage) {
