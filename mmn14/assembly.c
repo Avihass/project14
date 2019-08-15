@@ -12,12 +12,12 @@ int actLineInSrc = 1;
 
 int main(int argc, const char * argv[]) {
     
-    char srcFileName[MAX_FILE_NAME + 3];
+    char srcFileName[MAX_FILE_NAME + 4]; /* +4 character for ".as" and '\0' */
     FILE *srcFile;
     int firstWordType, instructType;
-    char readedFirstWord[MAX_LINE];
+    char readedFirstWord[MAX_MACRO_SIZE];
     int endOfSrc = 0;
-    char macroName[MAX_LINE];
+    char macroName[MAX_MACRO_SIZE];
     int macroVal;
     signTabPtr signTabHead;
     instructField actualInstruct;

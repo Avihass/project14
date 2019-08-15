@@ -22,18 +22,16 @@ void resetInstruct(instructField* instruction);
 int readFirstWord(FILE** file, char* readedWord) {
     
     int charCount = 0;
-    char word[MAX_LINE + 1] = {};
+    char word[MAX_MACRO_SIZE + 1] = {};
     fpos_t lineBegining;
     char readedChar;
     
     fgetpos(*file, &lineBegining);
     
     /* check if the line is not too long */
-    while (fgetc(*file) != '\n' && !feof(*file)) {
-        charCount++;
-    }
+    for (charCount = 0; fgetc(*file) != '\n' && !feof(*file); charCount++);
     
-    if (charCount > MAX_LINE) {
+    if (charCount > MAX_LINE_SIZE) {
         
         printErrorInSrcFile("the line is too long");
         return 0;
@@ -58,6 +56,16 @@ int readFirstWord(FILE** file, char* readedWord) {
     
     moveBack(&(*file));
     
+    /* count the word lenght */
+    for (charCount = 0; fgetc(*file) != ' '; charCount++);
+    
+    if (charCount > MAX_MACRO_SIZE) {
+        
+        printErrorInSrcFile("optianal charactere is to long");
+        return -1;
+    }
+    
+    fsetpos(*file, &lineBegining);
     readNextWord(&(*file), word, '\0');
     
     if (strcmp(word, ".define") == 0)
@@ -208,7 +216,7 @@ int isLegalOptChar(char* optCharName) {
 
 int readMacro(FILE** file, char* macroName) {
     
-    char word[MAX_LINE] = {};
+    char word[MAX_LINE_SIZE] = {};
     int macroVal;
     
     readNextWord(&(*file), word, '\0');
@@ -345,7 +353,7 @@ adOperand readOperand(FILE** file, int isSrcOp) {
     
     adOperand operand;
     char actualChar;
-    char readedWord[MAX_LINE];
+    char readedWord[MAX_LINE_SIZE];
     int tmp;
     
     ignoreWhiteChar(&(*file));

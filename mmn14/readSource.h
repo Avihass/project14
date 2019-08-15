@@ -2,7 +2,8 @@
 #ifndef readSource_h
 #define readSource_h
 
-#define MAX_LINE 80
+#define MAX_LINE_SIZE 100
+#define MAX_MACRO_SIZE 31
 
 enum firstWordOpt {
   
@@ -27,13 +28,13 @@ typedef struct AdressOperand {
     
     int type;
     int val;
-    char macroName[MAX_LINE];
-    char indexName[MAX_LINE];
+    char macroName[MAX_MACRO_SIZE];
+    char indexName[MAX_MACRO_SIZE];
 } adOperand;
 
 typedef struct instructionField {
     
-    char name[MAX_LINE];
+    char name[MAX_MACRO_SIZE];
     int type;
     adOperand srcOp;
     adOperand destOp;

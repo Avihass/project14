@@ -5,7 +5,7 @@
 typedef struct signTable* signTabPtr;
 typedef struct signTable {
     
-    char sign[MAX_LINE];
+    char sign[MAX_MACRO_SIZE];
     int dataType;
     int value;
     signTabPtr next;
