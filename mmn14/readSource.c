@@ -325,14 +325,14 @@ instructField readInstruction(FILE** file, char* instructName, int instructType)
         if (instruction.destOp.type == imediate_met && instructType != inst_cmp &&
             instructType != inst_prn && !haveError) {
             
-            printErrorInSrcFile("the imediate operand method is illegal with your instruction");
+            printErrorInSrcFile("the destination imediate operand method is illegal with your instruction");
         }
         
         if (instruction.destOp.type == index_met && (instructType == inst_jmp ||
                                                      instructType == inst_bne ||
                                                      instructType == inst_jsr)) {
             
-            printErrorInSrcFile("the index operand method is illegal with your instruction");
+            printErrorInSrcFile("the destination index operand method is illegal with your instruction");
         }
     }
     
@@ -355,7 +355,7 @@ adOperand readOperand(FILE** file, int isSrcOp) {
     
     adOperand operand;
     char actualChar;
-    char readedWord[MAX_LINE_SIZE];
+    char readedWord[MAX_LINE_SIZE] = {};
     int tmp;
     
     ignoreWhiteChar(&(*file));
@@ -365,6 +365,7 @@ adOperand readOperand(FILE** file, int isSrcOp) {
     operand.type = 0;
     operand.val = 0;
     strcpy(operand.macroName, "");
+    strcpy(operand.indexName, "");
     
     if (actualChar == '\n') {
         
@@ -459,7 +460,8 @@ adOperand readOperand(FILE** file, int isSrcOp) {
             /* check if ']' is in the word */
             indexStr = strchr(readedWord, ']');
             
-            if (indexStr != NULL) {
+            /* check if we find the close bracket and if the bracket is at the end of the word */
+            if (indexStr != NULL && *(indexStr + 1) == '\0') {
                 
                 /* erase the close brackets to check the number inside */
                 *indexStr = '\0';
@@ -481,7 +483,7 @@ adOperand readOperand(FILE** file, int isSrcOp) {
                         tmp = atoi(indexStr);
                         
                         if (tmp < 0)
-                            printErrorInSrcFile("invalid index number");
+                            printErrorInSrcFile("invalid index number, the index have to be positive");
                         
                         else {
                             
@@ -529,6 +531,9 @@ adOperand readOperand(FILE** file, int isSrcOp) {
                     strcpy(operand.macroName, readedWord);
                 }
             }
+            
+            else
+                printErrorInSrcFile("illegal optional character name");
         }
     } /* end of: else if (isalpha(actualChar)) */
     
