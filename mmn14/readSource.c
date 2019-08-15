@@ -22,7 +22,7 @@ void resetInstruct(instructField* instruction);
 int readFirstWord(FILE** file, char* readedWord) {
     
     int charCount = 0;
-    char word[MAX_MACRO_SIZE + 1] = {};
+    char word[MAX_MACRO_SIZE + 1];
     fpos_t lineBegining;
     char readedChar;
     
@@ -541,6 +541,36 @@ adOperand readOperand(FILE** file, int isSrcOp) {
         printErrorInSrcFile("illegal optional character name");
     
     return operand;
+}
+
+int readDataDirective(FILE** file, int isEnd) {
+    
+    char readedWord[MAX_LINE_SIZE];
+    int val;
+    char checkComma;
+    
+    readNextWord(&(*file), readedWord, ',');
+    
+    if (isNumber(readedWord)) {
+        
+        val = atoi(readedWord);
+        
+        if (val <= MAX_VAL && val >= MIN_VAL) {
+            
+            return val;
+        }
+        
+        else
+            printErrorInSrcFile("a value in data is too big or too small");
+    }
+    
+    else
+        printErrorInSrcFile("a value is not a valid number");
+    
+    ignoreWhiteChar(&(*file));
+    checkComma = fgetc(*file);
+    
+    return 0;
 }
 
 int isReserved(char* word) {

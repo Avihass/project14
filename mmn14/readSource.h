@@ -2,7 +2,7 @@
 #ifndef readSource_h
 #define readSource_h
 
-#define MAX_LINE_SIZE 100
+#define MAX_LINE_SIZE 80
 #define MAX_MACRO_SIZE 31
 
 /* the maximum and minimum value of a number in memory (12 bit length) */

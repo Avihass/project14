@@ -6,6 +6,8 @@
 #include "data&signTable.h"
 #include "utils.h"
 
+/* ============ SIGN TABLE ============ */
+
 /* constructor for signTab pointer, allocate a node with empty values */
 void signTabCtor(signTabPtr* sign) {
     
@@ -57,7 +59,7 @@ void addSign(signTabPtr head, char* signStr, int type, int val) {
     }
 }
 
-int isAvailable(signTabPtr head, char* signStr) {
+int isAvailableSign(signTabPtr head, char* signStr) {
     
     if (strcmp(head->sign, signStr) == 0)
         return 0;
@@ -65,7 +67,7 @@ int isAvailable(signTabPtr head, char* signStr) {
     if (head->next == NULL)
         return 1;
     
-    return isAvailable(head->next, signStr);
+    return isAvailableSign(head->next, signStr);
 }
 
 void freeSignTab(signTabPtr head) {
@@ -77,3 +79,7 @@ void freeSignTab(signTabPtr head) {
         
     return freeSignTab(head->next);
 }
+
+/* =========== DATA TABLE =========== */
+
+
