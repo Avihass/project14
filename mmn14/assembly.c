@@ -33,7 +33,7 @@ int main(int argc, const char * argv[]) {
     
     signTabCtor(&signTabHead);
     
-    /* first read */
+    /* first passage */
     while (!endOfSrc) {
         
         firstWordType = readFirstWord(&srcFile, readedFirstWord);

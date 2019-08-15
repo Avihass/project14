@@ -5,6 +5,10 @@
 #define MAX_LINE_SIZE 100
 #define MAX_MACRO_SIZE 31
 
+/* the maximum and minimum value of a number in memory (12 bit length) */
+#define MAX_VAL 2047
+#define MIN_VAL -2048
+
 enum firstWordOpt {
   
     in_macro, entry_line, extern_line, optional_char, instruction_line, in_comment, end_src_file, blank_line

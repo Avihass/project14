@@ -56,7 +56,7 @@ int readFirstWord(FILE** file, char* readedWord) {
     
     moveBack(&(*file));
     
-    /* count the word lenght */
+    /* count the word length */
     for (charCount = 0; fgetc(*file) != ' '; charCount++);
     
     if (charCount > MAX_MACRO_SIZE) {
@@ -217,7 +217,7 @@ int isLegalOptChar(char* optCharName) {
 int readMacro(FILE** file, char* macroName) {
     
     char word[MAX_LINE_SIZE] = {};
-    int macroVal;
+    int macroVal = 0;
     
     readNextWord(&(*file), word, '\0');
     
@@ -248,11 +248,13 @@ int readMacro(FILE** file, char* macroName) {
             printErrorInSrcFile("extra end line text");
     }
     
-    if (haveErrorInLine)
-        macroVal = 0;
-    
-    else
+    if (!haveErrorInLine) {
+        
         macroVal = atoi(word);
+        
+        if (macroVal > MAX_VAL || macroVal < MIN_VAL)
+            printErrorInSrcFile("your macro number is to big or to small");
+    }
     
     return macroVal;
 }
@@ -390,8 +392,15 @@ adOperand readOperand(FILE** file, int isSrcOp) {
             
             /* the value is a macro */
             if (!haveErrorInLine) {
-                operand.type = imediate_met;
-                strcpy(operand.macroName, readedWord);
+                
+                if (strlen(readedWord) > MAX_MACRO_SIZE)
+                    printErrorInSrcFile("the macro name is too big");
+                
+                else {
+                    
+                    operand.type = imediate_met;
+                    strcpy(operand.macroName, readedWord);
+                }
             }
         }
         
@@ -476,17 +485,29 @@ adOperand readOperand(FILE** file, int isSrcOp) {
                         
                         else {
                             
-                            operand.type = index_met;
-                            operand.val = tmp;
-                            strcpy(operand.macroName, readedWord);
+                            if (strlen(readedWord) > MAX_MACRO_SIZE)
+                                printErrorInSrcFile("the optional charactere name is too big");
+                            
+                            else {
+                                
+                                operand.type = index_met;
+                                operand.val = tmp;
+                                strcpy(operand.macroName, readedWord);
+                            }
                         }
                     }
                     
                     else if (islegalMacroName(indexStr)) {
                         
-                        operand.type = index_met;
-                        strcpy(operand.macroName, readedWord);
-                        strcpy(operand.indexName, indexStr);
+                        if (strlen(readedWord) > MAX_MACRO_SIZE)
+                            printErrorInSrcFile("the macro name in index is too big");
+                        
+                        else {
+                            
+                            operand.type = index_met;
+                            strcpy(operand.macroName, readedWord);
+                            strcpy(operand.indexName, indexStr);
+                        }
                     }
                     
                     else
@@ -499,8 +520,14 @@ adOperand readOperand(FILE** file, int isSrcOp) {
             
             else if (islegalMacroName(readedWord)) {
                 
-                operand.type = direct_met;
-                strcpy(operand.macroName, readedWord);
+                if (strlen(readedWord) > MAX_MACRO_SIZE)
+                    printErrorInSrcFile("the optional charactere name is too big");
+                
+                else {
+                    
+                    operand.type = direct_met;
+                    strcpy(operand.macroName, readedWord);
+                }
             }
         }
     } /* end of: else if (isalpha(actualChar)) */
