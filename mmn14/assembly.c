@@ -39,18 +39,18 @@ int main(int argc, const char * argv[]) {
     /* first passage */
     while (!endOfSrc) {
         
-        firstWordType = readFirstWord(&srcFile, readedFirstWord);
+        firstWordType = readFirstWord(srcFile, readedFirstWord);
         
         if (firstWordType == optional_char) {
             
             haveOptChar = 1;
             strcpy(optCharName, readedFirstWord);
-            firstWordType = readFirstWord(&srcFile, readedFirstWord);
+            firstWordType = readFirstWord(srcFile, readedFirstWord);
         }
         
         if (firstWordType == in_macro) {
             
-            macroVal = readMacro(&srcFile, macroName);
+            macroVal = readMacro(srcFile, macroName);
             
             if (haveOptChar)
                 printErrorInSrcFile("optional char are illegal with macro statement");
@@ -64,7 +64,7 @@ int main(int argc, const char * argv[]) {
                     addSign(signTabHead, macroName, macro_sign, macroVal);
             }
             
-            mvToNextLine(&srcFile);
+            mvToNextLine(srcFile);
             actLineInSrc++;
             haveErrorInLine = 0;
         }
@@ -72,7 +72,7 @@ int main(int argc, const char * argv[]) {
         else if (firstWordType == instruction_line) {
             
             instructType = identifyInstruction(readedFirstWord);
-            actualInstruct = readInstruction(&srcFile, "", instructType);
+            actualInstruct = readInstruction(srcFile, "", instructType);
             
             printf("instruct type: %d\n", actualInstruct.type);
             printf("\nsource operand type: %d\n", actualInstruct.srcOp.type);
@@ -84,7 +84,7 @@ int main(int argc, const char * argv[]) {
             printf("destination operand name: %s\n", actualInstruct.destOp.macroName);
             printf("destination operand index name: %s\n", actualInstruct.destOp.indexName);
             
-            mvToNextLine(&srcFile);
+            mvToNextLine(srcFile);
             actLineInSrc++;
             haveErrorInLine = 0;
         }
@@ -94,7 +94,7 @@ int main(int argc, const char * argv[]) {
             if (haveOptChar)
                 printErrorInSrcFile("expected directive or instruction after optional char");
             
-            mvToNextLine(&srcFile);
+            mvToNextLine(srcFile);
             actLineInSrc++;
             haveErrorInLine = 0;
         }

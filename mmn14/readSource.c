@@ -8,28 +8,28 @@
 #include "assembly.h"
 
 /* private functions */
-void ignoreWhiteChar(FILE** file);
-void moveBack(FILE** file);
-void moveWordBack(FILE** file, char charLimit);
-void readNextWord(FILE** src, char* dest, char charLimit);
+void ignoreWhiteChar(FILE* file);
+void moveBack(FILE* file);
+void moveWordBack(FILE* file, char charLimit);
+void readNextWord(FILE* src, char* dest, char charLimit);
 int isLegalOptChar(char* word);
 int isReserved(char* word);
 int isNumber(char* word);
 int islegalMacroName(char* macroName);
-adOperand readOperand(FILE** file, int isSrcOp);
+adOperand readOperand(FILE* file, int isSrcOp);
 void resetInstruct(instructField* instruction);
 
-int readFirstWord(FILE** file, char* readedWord) {
+int readFirstWord(FILE* file, char* readedWord) {
     
     int charCount = 0;
     char word[MAX_MACRO_SIZE + 1];
     fpos_t lineBegining;
     char readedChar;
     
-    fgetpos(*file, &lineBegining);
+    fgetpos(file, &lineBegining);
     
     /* check if the line is not too long */
-    for (charCount = 0; fgetc(*file) != '\n' && !feof(*file); charCount++);
+    for (charCount = 0; fgetc(file) != '\n' && !feof(file); charCount++);
     
     if (charCount > MAX_LINE_SIZE) {
         
@@ -37,16 +37,16 @@ int readFirstWord(FILE** file, char* readedWord) {
         return 0;
     }
 
-    fsetpos(*file, &lineBegining);
-    ignoreWhiteChar(&(*file));
-    readedChar = fgetc(*file);
+    fsetpos(file, &lineBegining);
+    ignoreWhiteChar(file);
+    readedChar = fgetc(file);
     
     if (readedChar == EOF)
         return end_src_file;
     
     if (readedChar == '\n') {
         
-        moveBack(&(*file));
+        moveBack(file);
         return blank_line;
     }
     
@@ -54,10 +54,10 @@ int readFirstWord(FILE** file, char* readedWord) {
     if (readedChar == ';')
         return in_comment;
     
-    moveBack(&(*file));
+    moveBack(file);
     
     /* count the word length */
-    for (charCount = 0; fgetc(*file) != ' '; charCount++);
+    for (charCount = 0; fgetc(file) != ' '; charCount++);
     
     if (charCount > MAX_MACRO_SIZE) {
         
@@ -65,8 +65,8 @@ int readFirstWord(FILE** file, char* readedWord) {
         return -1;
     }
     
-    fsetpos(*file, &lineBegining);
-    readNextWord(&(*file), word, '\0');
+    fsetpos(file, &lineBegining);
+    readNextWord(file, word, '\0');
     
     if (strcmp(word, ".define") == 0)
         return in_macro;
@@ -96,7 +96,7 @@ int readFirstWord(FILE** file, char* readedWord) {
 /* the function stop to read when we read ' ' (space), '\t' or eof and
    receive charLimit in parameter for stop read when we read another
    character, we can send '\0' if there is no specifie character */
-void readNextWord(FILE** src, char* dest, char charLimit) {
+void readNextWord(FILE* src, char* dest, char charLimit) {
     
     int inWord = 1;
     char currentChar;
@@ -112,15 +112,15 @@ void readNextWord(FILE** src, char* dest, char charLimit) {
     
     while (inWord) {
         
-        currentChar = fgetc(*src);
+        currentChar = fgetc(src);
         
         if (currentChar == ' ' || currentChar == '\t' || currentChar == '\n'
-            || currentChar == charLimit || feof(*src)) {
+            || currentChar == charLimit || feof(src)) {
             
             inWord = 0;
             
-            if (!feof(*src))
-                moveBack(&(*src));
+            if (!feof(src))
+                moveBack(src);
         }
         
         else {
@@ -214,12 +214,12 @@ int isLegalOptChar(char* optCharName) {
     return 1;
 }
 
-int readMacro(FILE** file, char* macroName) {
+int readMacro(FILE* file, char* macroName) {
     
     char word[MAX_LINE_SIZE] = {};
     int macroVal = 0;
     
-    readNextWord(&(*file), word, '\0');
+    readNextWord(file, word, '\0');
     
     if (isReserved(word))
         printErrorInSrcFile("the macro name is reserved");
@@ -230,21 +230,21 @@ int readMacro(FILE** file, char* macroName) {
     
     strcpy(macroName, word);
     
-    readNextWord(&(*file), word, '\0');
+    readNextWord(file, word, '\0');
     
     if (strcmp(word, "=") != 0)
         printErrorInSrcFile("wrong macro declaration");
     
     if (!haveErrorInLine) {
         
-        readNextWord(&(*file), word, '\0');
+        readNextWord(file, word, '\0');
         
         if (!isNumber(word))
             printErrorInSrcFile("illegal macro value");
         
-        ignoreWhiteChar(&(*file));
+        ignoreWhiteChar(file);
         
-        if (fgetc(*file) != '\n' && !feof(*file))
+        if (fgetc(file) != '\n' && !feof(file))
             printErrorInSrcFile("extra end line text");
     }
     
@@ -277,7 +277,7 @@ int islegalMacroName(char* macroName) {
     return 1;
 }
 
-instructField readInstruction(FILE** file, char* instructName, int instructType) {
+instructField readInstruction(FILE* file, char* instructName, int instructType) {
     
     instructField instruction;
     resetInstruct(&instruction);
@@ -296,7 +296,7 @@ instructField readInstruction(FILE** file, char* instructName, int instructType)
     if (instructType == inst_mov || instructType == inst_cmp || instructType == inst_add ||
         instructType == inst_sub || instructType == inst_lea) {
         
-        instruction.srcOp = readOperand(&(*file), 1);
+        instruction.srcOp = readOperand(file, 1);
         
         if (instruction.type == inst_lea && (instruction.srcOp.type == imediate_met ||
                                              instruction.srcOp.type == register_met)) {
@@ -305,13 +305,13 @@ instructField readInstruction(FILE** file, char* instructName, int instructType)
         }
         
         /* check if there is not a destination */
-        ignoreWhiteChar(&(*file));
-        actualChar = fgetc(*file);
+        ignoreWhiteChar(file);
+        actualChar = fgetc(file);
         
         if (actualChar == '\n') {
             
             printErrorInSrcFile("expected destination operand");
-            moveBack(&(*file));
+            moveBack(file);
         }
         
         else if (actualChar != ',')
@@ -320,7 +320,7 @@ instructField readInstruction(FILE** file, char* instructName, int instructType)
     
     if (!haveErrorInLine && instructType != inst_rts && instructType != inst_stop) {
         
-        instruction.destOp = readOperand(&(*file), 0);
+        instruction.destOp = readOperand(file, 0);
         
         if (instruction.destOp.type == imediate_met && instructType != inst_cmp &&
             instructType != inst_prn && !haveError) {
@@ -338,28 +338,28 @@ instructField readInstruction(FILE** file, char* instructName, int instructType)
     
     if (!haveErrorInLine) {
         
-        ignoreWhiteChar(&(*file));
-        actualChar = fgetc(*file);
+        ignoreWhiteChar(file);
+        actualChar = fgetc(file);
         
-        if (actualChar != '\n' && !feof(*file))
+        if (actualChar != '\n' && !feof(file))
             printErrorInSrcFile("extra end text");
         
-        if (!feof(*file))
-            moveBack(&(*file));
+        if (!feof(file))
+            moveBack(file);
     }
     
     return instruction;
 }
 
-adOperand readOperand(FILE** file, int isSrcOp) {
+adOperand readOperand(FILE* file, int isSrcOp) {
     
     adOperand operand;
     char actualChar;
     char readedWord[MAX_LINE_SIZE] = {};
     int tmp;
     
-    ignoreWhiteChar(&(*file));
-    actualChar = fgetc(*file);
+    ignoreWhiteChar(file);
+    actualChar = fgetc(file);
     
     /* initialize operand */
     operand.type = 0;
@@ -375,16 +375,16 @@ adOperand readOperand(FILE** file, int isSrcOp) {
         else
             printErrorInSrcFile("missing destination operand");
         
-        moveBack(&(*file));
+        moveBack(file);
     }
     
     else if (actualChar == '#') {
         
         if (isSrcOp)
-            readNextWord(&(*file), readedWord, ',');
+            readNextWord(file, readedWord, ',');
         
         else
-            readNextWord(&(*file), readedWord, '\0');
+            readNextWord(file, readedWord, '\0');
         
         if (!isNumber(readedWord)) {
             
@@ -420,10 +420,10 @@ adOperand readOperand(FILE** file, int isSrcOp) {
         if (actualChar == 'r') {
             
             if (isSrcOp)
-                readNextWord(&(*file), readedWord, ',');
+                readNextWord(file, readedWord, ',');
             
             else
-                readNextWord(&(*file), readedWord, '\0');
+                readNextWord(file, readedWord, '\0');
             
             OpIsReaded = 1;
             
@@ -447,14 +447,14 @@ adOperand readOperand(FILE** file, int isSrcOp) {
             
             if (isSrcOp) {
                 
-                moveWordBack(&(*file), '\0');
-                readNextWord(&(*file), readedWord, ',');
+                moveWordBack(file, '\0');
+                readNextWord(file, readedWord, ',');
             }
             
             else {
                 
-                moveWordBack(&(*file), ',');
-                readNextWord(&(*file), readedWord, '\0');
+                moveWordBack(file, ',');
+                readNextWord(file, readedWord, '\0');
             }
             
             /* check if ']' is in the word */
@@ -543,13 +543,13 @@ adOperand readOperand(FILE** file, int isSrcOp) {
     return operand;
 }
 
-int readDataDirective(FILE** file, int isEnd) {
+int readDataDirective(FILE* file, int isEnd) {
     
     char readedWord[MAX_LINE_SIZE];
     int val;
     char checkComma;
     
-    readNextWord(&(*file), readedWord, ',');
+    readNextWord(file, readedWord, ',');
     
     if (isNumber(readedWord)) {
         
@@ -567,8 +567,8 @@ int readDataDirective(FILE** file, int isEnd) {
     else
         printErrorInSrcFile("a value is not a valid number");
     
-    ignoreWhiteChar(&(*file));
-    checkComma = fgetc(*file);
+    ignoreWhiteChar(file);
+    checkComma = fgetc(file);
     
     return 0;
 }
@@ -613,53 +613,53 @@ int isNumber(char* word){
     return 1;
 }
 
-void ignoreWhiteChar(FILE** file) {
+void ignoreWhiteChar(FILE* file) {
     
     char currentChar;
     
     do {
         
-        currentChar = fgetc(*file);
+        currentChar = fgetc(file);
     }while (currentChar == ' ' || currentChar == '\t');
     
-    if (!feof(*file))
-        moveBack(&(*file));
+    if (!feof(file))
+        moveBack(file);
 }
 
 /* used after fgetc to go back one character */
-void moveBack(FILE** file) {
+void moveBack(FILE* file) {
     
-    fseek(*file, -1, SEEK_CUR);
+    fseek(file, -1, SEEK_CUR);
 }
 
 /* move to a word begining */
-void moveWordBack(FILE** file, char charLimit) {
+void moveWordBack(FILE* file, char charLimit) {
     
     int beginPoint = 0;
     int actualChar;
     
     do {
         
-        moveBack(&(*file));
-        actualChar = fgetc(*file);
+        moveBack(file);
+        actualChar = fgetc(file);
         
         if (actualChar == ' ' || actualChar == '\t' || actualChar == '\n' || actualChar == charLimit)
             beginPoint = 1;
         
-        moveBack(&(*file));
+        moveBack(file);
     }while (!beginPoint);
     
     /* move to word begining char */
-    fgetc(*file);
+    fgetc(file);
 }
 
-void mvToNextLine(FILE** file) {
+void mvToNextLine(FILE* file) {
     
     int readedChar;
     
     do {
         
-        readedChar = fgetc(*file);
+        readedChar = fgetc(file);
     }while (readedChar != '\n' && readedChar != EOF);
     
         
