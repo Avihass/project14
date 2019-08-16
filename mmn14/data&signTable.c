@@ -9,7 +9,7 @@
 /* ============ SIGN TABLE ============ */
 
 /* constructor for signTab pointer, allocate a node with empty values */
-void signTabCtor(signTabPtr* sign) {
+void signTabCtor(signTabPtr* signTabHead) {
     
     signTabPtr signTmp;
     signTmp = (signTabPtr) malloc(sizeof(signTab));
@@ -21,7 +21,7 @@ void signTabCtor(signTabPtr* sign) {
     strcpy(signTmp->sign, "");
     signTmp->next = NULL;
     
-    *sign = &(*signTmp);
+    *signTabHead = &(*signTmp);
 }
 
 void addSign(signTabPtr head, char* signStr, int type, int val) {
@@ -82,4 +82,19 @@ void freeSignTab(signTabPtr head) {
 
 /* =========== DATA TABLE =========== */
 
-
+/* constructor for dataTab pointer, allocate a node with empty values */
+void dataTabCtor(dataTabPtr* dataTabHead) {
+    
+    dataTabPtr dataTmp;
+    dataTmp = (dataTabPtr) malloc(sizeof(dataTab));
+    
+    if (!dataTmp)
+        printErrorAndStop("can't allocate memory");
+    
+    /* initialize the sign name */
+    dataTmp->adress = -1;
+    resetBinWord(dataTmp->binWord);
+    dataTmp->next = NULL;
+    
+    *dataTabHead = &(*dataTmp);
+}

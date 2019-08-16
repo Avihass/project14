@@ -18,6 +18,7 @@ int isNumber(char* word);
 int islegalMacroName(char* macroName);
 adOperand readOperand(FILE* file, int isSrcOp);
 void resetInstruct(instructField* instruction);
+int isEndLine(FILE* file);
 
 int readFirstWord(FILE* file, char* readedWord) {
     
@@ -70,6 +71,12 @@ int readFirstWord(FILE* file, char* readedWord) {
     
     if (strcmp(word, ".define") == 0)
         return in_macro;
+    
+    if (strcmp(word, ".data") == 0)
+        return data_line;
+    
+    if (strcmp(word, ".string") == 0)
+        return string_line;
     
     if (strcmp(word, ".entry") == 0)
         return entry_line;
@@ -546,8 +553,8 @@ adOperand readOperand(FILE* file, int isSrcOp) {
 int readDataDirective(FILE* file, int isEnd) {
     
     char readedWord[MAX_LINE_SIZE];
-    int val;
-    char checkComma;
+    int val = 0;
+    char actualChar;
     
     readNextWord(file, readedWord, ',');
     
@@ -555,20 +562,38 @@ int readDataDirective(FILE* file, int isEnd) {
         
         val = atoi(readedWord);
         
-        if (val <= MAX_VAL && val >= MIN_VAL) {
-            
-            return val;
-        }
-        
-        else
+        if (val > MAX_VAL || val < MIN_VAL)
             printErrorInSrcFile("a value in data is too big or too small");
     }
     
     else
         printErrorInSrcFile("a value is not a valid number");
     
-    ignoreWhiteChar(file);
-    checkComma = fgetc(file);
+    if (!haveErrorInLine) {
+        
+        ignoreWhiteChar(file);
+        actualChar = fgetc(file);
+        
+        if (actualChar == ',') {
+            
+            if (isEndLine(file))
+                printErrorInSrcFile("extra comma at the end of line");
+        }
+        
+        else if (actualChar != '\n' && !feof(file))
+            printErrorInSrcFile("missing comma after a number");
+        
+        else {
+            
+            isEnd = 1;
+            
+            if (actualChar == '\n')
+                moveBack(file);
+        }
+    }
+    
+    if (!haveErrorInLine)
+        return val;
     
     return 0;
 }
@@ -653,6 +678,28 @@ void moveWordBack(FILE* file, char charLimit) {
     fgetc(file);
 }
 
+/* check if there are no characteres to read in the line,
+   this function dont change the position in the file */
+int isEndLine(FILE* file) {
+    
+    fpos_t orginPos;
+    fgetpos(file, &orginPos);
+    
+    ignoreWhiteChar(file);
+    
+    if (fgetc(file) == '\n' || feof(file)) {
+        
+        fsetpos(file, &orginPos);
+        return 1;
+    }
+    
+    else {
+        
+        fsetpos(file, &orginPos);
+        return 0;
+    }
+}
+
 void mvToNextLine(FILE* file) {
     
     int readedChar;
@@ -662,7 +709,6 @@ void mvToNextLine(FILE* file) {
         readedChar = fgetc(file);
     }while (readedChar != '\n' && readedChar != EOF);
     
-        
 }
 
 void resetInstruct(instructField* instruction) {

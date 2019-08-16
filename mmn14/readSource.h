@@ -11,7 +11,8 @@
 
 enum firstWordOpt {
   
-    in_macro, entry_line, extern_line, optional_char, instruction_line, in_comment, end_src_file, blank_line
+    in_macro, data_line, string_line, entry_line, extern_line, optional_char, instruction_line, in_comment, end_src_file,
+    blank_line
 };
 
 enum adressMethods {
@@ -49,7 +50,10 @@ int readFirstWord(FILE* file, char* readedWord);
 int readMacro(FILE* file, char* macroName);
 void mvToNextLine(FILE* file);
 instructField readInstruction(FILE* file, char* instructName, int instructType);
+
 int identifyInstruction(char* word); /* return the instruction type and return -1 if the word
                                         is not an instruction */
+
+int readDataDirective(FILE* file, int isEnd);
 
 #endif /* readSource_h */

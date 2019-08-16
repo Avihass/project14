@@ -2,6 +2,9 @@
 #ifndef data_signTable_h
 #define data_signTable_h
 
+#include "bin&specConvert.h" /* for binAdressWord */
+
+/* sign table */
 typedef struct signTable* signTabPtr;
 typedef struct signTable {
     
@@ -13,12 +16,27 @@ typedef struct signTable {
 
 enum signType {
     
-    macro_sign, code_sign, data_sign
+    macro_sign, code_sign, data_sign, extern_sign
 };
 
-void signTabCtor(signTabPtr* sign); /* construct a first node in a signTabPtr */
+/* data table */
+typedef struct dataTable* dataTabPtr;
+typedef struct dataTable {
+    
+    int adress;
+    binAdressWord binWord;
+    dataTabPtr next;
+} dataTab;
+
+/* === sign table === */
+
+void signTabCtor(signTabPtr* signTabHead); /* construct a first node in a signTabPtr */
 void addSign(signTabPtr head, char* signStr, int type, int val);
 int isAvailableSign(signTabPtr head, char* signStr); /* check the availablity of a
                                                     sign name */
 void freeSignTab(signTabPtr head);
+
+/* === data table === */
+
+void dataTabCtor(dataTabPtr* dataTabHead);
 #endif /* data_signTable_h */

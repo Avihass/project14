@@ -11,6 +11,7 @@
 		194911E022CD81B300E3DB04 /* data&signTable.c in Sources */ = {isa = PBXBuildFile; fileRef = 194911DF22CD81B300E3DB04 /* data&signTable.c */; };
 		19B00BB422C91F830058DD03 /* readSource.c in Sources */ = {isa = PBXBuildFile; fileRef = 19B00BB322C91F830058DD03 /* readSource.c */; };
 		19B00BB722C937940058DD03 /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 19B00BB622C937940058DD03 /* utils.c */; };
+		19DBCAB123062F000071CA14 /* bin&specConvert.c in Sources */ = {isa = PBXBuildFile; fileRef = 19DBCAB023062F000071CA14 /* bin&specConvert.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -35,6 +36,8 @@
 		19B00BB322C91F830058DD03 /* readSource.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = readSource.c; sourceTree = "<group>"; };
 		19B00BB522C937940058DD03 /* utils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = utils.h; sourceTree = "<group>"; };
 		19B00BB622C937940058DD03 /* utils.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = utils.c; sourceTree = "<group>"; };
+		19DBCAAF23062F000071CA14 /* bin&specConvert.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "bin&specConvert.h"; sourceTree = "<group>"; };
+		19DBCAB023062F000071CA14 /* bin&specConvert.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "bin&specConvert.c"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,6 +78,8 @@
 				19B00BB522C937940058DD03 /* utils.h */,
 				194911DF22CD81B300E3DB04 /* data&signTable.c */,
 				194911DE22CD81B300E3DB04 /* data&signTable.h */,
+				19DBCAB023062F000071CA14 /* bin&specConvert.c */,
+				19DBCAAF23062F000071CA14 /* bin&specConvert.h */,
 			);
 			path = mmn14;
 			sourceTree = "<group>";
@@ -140,6 +145,7 @@
 				19B00BB422C91F830058DD03 /* readSource.c in Sources */,
 				194911E022CD81B300E3DB04 /* data&signTable.c in Sources */,
 				193CB9B522B042EB00FDFD0B /* assembly.c in Sources */,
+				19DBCAB123062F000071CA14 /* bin&specConvert.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
