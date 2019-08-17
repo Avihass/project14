@@ -600,7 +600,31 @@ int readDataDirective(FILE* file, int* isEnd) {
 
 void readStringDirective(FILE* file, char* strDest) {
     
+    char readedWord[MAX_LINE_SIZE];
     
+    readNextWord(file, readedWord, '\0');
+    
+    if (readedWord[0] != '"')
+        printErrorInSrcFile("missing quote for string directive");
+    
+    else if (readedWord[strlen(readedWord) - 1] != '"')
+        printErrorInSrcFile("missing quote for string directive");
+    
+    /* check if the string is empty */
+    else if (strlen(strDest) == 2)
+        return;
+    
+    else {
+        
+        /* copy the string without the first quote */
+        strcpy(strDest, readedWord + 1);
+        
+        /* erase the last quote */
+        strDest[strlen(strDest) - 1] = '\0';
+    }
+    
+    if (!isEndLine(file))
+        printErrorInSrcFile("extra end line text");
 }
 
 int isReserved(char* word) {

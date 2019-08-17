@@ -89,10 +89,8 @@ int main(int argc, const char * argv[]) {
             
             if (haveOptChar) {
                 
-                if (isAvailableSign(signTabHead, optCharName)) {
-                    
+                if (isAvailableSign(signTabHead, optCharName))
                     addSign(signTabHead, optCharName, data_sign, DC);
-                }
             }
             
             while (!endOfLine && !haveErrorInLine) {
@@ -105,7 +103,6 @@ int main(int argc, const char * argv[]) {
                     resetBinWord(actualAdWord);
                     insrtDecToBin(actualAdWord, readedNum, 0, BIN_WORD_SIZE);
                     addData(dataTabHead, DC, actualAdWord);
-                    
                     DC++;
                 }
             }
@@ -118,7 +115,33 @@ int main(int argc, const char * argv[]) {
         
         else if (firstWordType == string_line) {
             
+            char readedStr[MAX_LINE_SIZE];
+            int i;
             
+            if (haveOptChar) {
+                
+                if (isAvailableSign(signTabHead, optCharName))
+                    addSign(signTabHead, optCharName, data_sign, DC);
+            }
+            
+            readStringDirective(srcFile, readedStr);
+            
+            /* if the string is not empty */
+            if (readedStr[0] != '\0') {
+                
+                for (i = 0; i < strlen(readedStr); i++) {
+                    
+                    resetBinWord(actualAdWord);
+                    insrtDecToBin(actualAdWord, readedStr[i], 0, BIN_WORD_SIZE);
+                    addData(dataTabHead, DC, actualAdWord);
+                    DC++;
+                }
+            }
+            
+            mvToNextLine(srcFile);
+            actLineInSrc++;
+            haveErrorInLine = 0;
+            haveOptChar = 0;
         }
         
         else if (firstWordType == instruction_line) {

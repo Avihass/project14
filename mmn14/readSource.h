@@ -55,5 +55,6 @@ int identifyInstruction(char* word); /* return the instruction type and return -
                                         is not an instruction */
 
 int readDataDirective(FILE* file, int* isEnd);
+void readStringDirective(FILE* file, char* strDest);
 
 #endif /* readSource_h */
