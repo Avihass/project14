@@ -6,6 +6,7 @@
 #include "readSource.h"
 #include "data&signTable.h"
 #include "utils.h"
+#include "bin&specConvert.h"
 
 /* the actual line in source file number */
 int actLineInSrc = 1;
@@ -22,7 +23,10 @@ int main(int argc, const char * argv[]) {
     char optCharName[MAX_MACRO_SIZE] = {};
     int haveOptChar = 0;
     signTabPtr signTabHead;
+    dataTabPtr dataTabHead;
     instructField actualInstruct;
+    binAdressWord actualAdWord;
+    int IC, DC;
     
     if (strlen(argv[1]) >= MAX_FILE_NAME)
         printError("the source file name is to long");
@@ -33,8 +37,12 @@ int main(int argc, const char * argv[]) {
     if (!(srcFile = fopen("src.as", "r")))
         printError("can't open the source file");
     
-    /* construct the signTabHead */
+    /* construct the tables */
     signTabCtor(&signTabHead);
+    dataTabCtor(&dataTabHead);
+    
+    IC = 100;
+    DC = 0;
     
     /* first passage */
     while (!endOfSrc) {
@@ -44,6 +52,10 @@ int main(int argc, const char * argv[]) {
         if (firstWordType == optional_char) {
             
             haveOptChar = 1;
+            
+            /* remove the ':' character */
+            readedFirstWord[strlen(readedFirstWord) - 1] = '\0';
+            
             strcpy(optCharName, readedFirstWord);
             firstWordType = readFirstWord(srcFile, readedFirstWord);
         }
@@ -67,16 +79,46 @@ int main(int argc, const char * argv[]) {
             mvToNextLine(srcFile);
             actLineInSrc++;
             haveErrorInLine = 0;
+            haveOptChar = 0;
         }
         
         else if (firstWordType == data_line) {
             
-            int endOfLine = 1;
+            int endOfLine = 0;
+            int readedNum;
+            
+            if (haveOptChar) {
+                
+                if (isAvailableSign(signTabHead, optCharName)) {
+                    
+                    addSign(signTabHead, optCharName, data_sign, DC);
+                }
+            }
             
             while (!endOfLine && !haveErrorInLine) {
                 
+                readedNum = readDataDirective(srcFile, &endOfLine);
                 
+                if (!haveErrorInLine) {
+                    
+                    /* insert the number to the data table, in adress word */
+                    resetBinWord(actualAdWord);
+                    insrtDecToBin(actualAdWord, readedNum, 0, BIN_WORD_SIZE);
+                    addData(dataTabHead, DC, actualAdWord);
+                    
+                    DC++;
+                }
             }
+            
+            mvToNextLine(srcFile);
+            actLineInSrc++;
+            haveErrorInLine = 0;
+            haveOptChar = 0;
+        }
+        
+        else if (firstWordType == string_line) {
+            
+            
         }
         
         else if (firstWordType == instruction_line) {
@@ -108,7 +150,8 @@ int main(int argc, const char * argv[]) {
         }
     }
     
-    freeSignTab(signTabHead);
+    freeSignTab(signTabHead, NULL);
+    freeDataTab(dataTabHead, NULL);
     
     return 0;
 }

@@ -5,6 +5,7 @@
 #include "readSource.h"
 #include "data&signTable.h"
 #include "utils.h"
+#include "bin&specConvert.h"
 
 /* ============ SIGN TABLE ============ */
 
@@ -38,7 +39,7 @@ void addSign(signTabPtr head, char* signStr, int type, int val) {
         
         /* create new sign */
         signTabPtr signTmp;
-        signTabPtr signIndex = head->next;
+        signTabPtr signIndex = head;
         signTmp = (signTabPtr) malloc(sizeof(signTab));
         
         if (!signTmp)
@@ -50,12 +51,12 @@ void addSign(signTabPtr head, char* signStr, int type, int val) {
         signTmp->next = NULL;
         
         /* go to end of the table */
-        while (signIndex != NULL) {
+        while (signIndex->next != NULL) {
             signIndex = signIndex->next;
         }
         
         /* add the sign */
-        signIndex->next = &(*signTmp);
+        signIndex->next = signTmp;
     }
 }
 
@@ -70,14 +71,16 @@ int isAvailableSign(signTabPtr head, char* signStr) {
     return isAvailableSign(head->next, signStr);
 }
 
-void freeSignTab(signTabPtr head) {
+void freeSignTab(signTabPtr head, signTabPtr tmp) {
+    
+    tmp = head->next;
     
     free(head);
     
-    if (head->next == NULL)
+    if (tmp == NULL)
         return;
         
-    return freeSignTab(head->next);
+    return freeSignTab(tmp, NULL);
 }
 
 /* =========== DATA TABLE =========== */
@@ -98,3 +101,49 @@ void dataTabCtor(dataTabPtr* dataTabHead) {
     
     *dataTabHead = &(*dataTmp);
 }
+
+void addData(dataTabPtr head, int ad, binAdressWord word) {
+    
+    /* if the data table is empty */
+    if (head->adress == -1) {
+        
+        head->adress = ad;
+        cpyBinWord(head->binWord, word);
+    }
+    
+    else {
+        
+        /* create new data node */
+        dataTabPtr dataTmp;
+        dataTabPtr dataIndex = head;
+        dataTmp = (dataTabPtr) malloc(sizeof(dataTab));
+        
+        if (!dataTmp)
+            printErrorAndStop("can't allocate memory");
+        
+        dataTmp->adress = ad;
+        cpyBinWord(dataTmp->binWord, word);
+        dataTmp->next = NULL;
+        
+        /* go to end of the table */
+        while (dataIndex->next != NULL) {
+            dataIndex = dataIndex->next;
+        }
+        
+        /* add the sign */
+        dataIndex->next = dataTmp;
+    }
+}
+
+void freeDataTab(dataTabPtr head, dataTabPtr tmp) {
+    
+    tmp = head->next;
+    
+    free(head);
+    
+    if (tmp == NULL)
+        return;
+    
+    return freeDataTab(tmp, NULL);
+}
+

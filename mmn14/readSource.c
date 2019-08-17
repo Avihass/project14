@@ -23,7 +23,7 @@ int isEndLine(FILE* file);
 int readFirstWord(FILE* file, char* readedWord) {
     
     int charCount = 0;
-    char word[MAX_MACRO_SIZE + 1];
+    char word[MAX_MACRO_SIZE + 1] = {};
     fpos_t lineBegining;
     char readedChar;
     
@@ -110,7 +110,7 @@ void readNextWord(FILE* src, char* dest, char charLimit) {
     int i = 0;
     
     /* reset the destination string */
-    for (i = 0; dest[i] != '\0'; i++) {
+    for (i = 0; i < strlen(dest); i++) {
         dest[i] = '\0';
     }
     
@@ -550,9 +550,9 @@ adOperand readOperand(FILE* file, int isSrcOp) {
     return operand;
 }
 
-int readDataDirective(FILE* file, int isEnd) {
+int readDataDirective(FILE* file, int* isEnd) {
     
-    char readedWord[MAX_LINE_SIZE];
+    char readedWord[MAX_LINE_SIZE] = {};
     int val = 0;
     char actualChar;
     
@@ -585,7 +585,7 @@ int readDataDirective(FILE* file, int isEnd) {
         
         else {
             
-            isEnd = 1;
+            *isEnd = 1;
             
             if (actualChar == '\n')
                 moveBack(file);
@@ -598,9 +598,15 @@ int readDataDirective(FILE* file, int isEnd) {
     return 0;
 }
 
+void readStringDirective(FILE* file, char* strDest) {
+    
+    
+}
+
 int isReserved(char* word) {
     
-    if (identifyInstruction(word))
+    /* if the word is identical to an instruction */
+    if (identifyInstruction(word) != -1)
         return 1;
     
     if (strcmp(word, "r0") == 0 || strcmp(word, "r1") == 0 || strcmp(word, "r2") == 0 ||

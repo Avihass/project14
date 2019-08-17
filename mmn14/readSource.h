@@ -54,6 +54,6 @@ instructField readInstruction(FILE* file, char* instructName, int instructType);
 int identifyInstruction(char* word); /* return the instruction type and return -1 if the word
                                         is not an instruction */
 
-int readDataDirective(FILE* file, int isEnd);
+int readDataDirective(FILE* file, int* isEnd);
 
 #endif /* readSource_h */
