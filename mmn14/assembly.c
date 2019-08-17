@@ -144,6 +144,11 @@ int main(int argc, const char * argv[]) {
             haveOptChar = 0;
         }
         
+        else if (firstWordType == entry_line) {
+            
+            
+        }
+        
         else if (firstWordType == instruction_line) {
             
             instructType = identifyInstruction(readedFirstWord);

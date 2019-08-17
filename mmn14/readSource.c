@@ -109,11 +109,6 @@ void readNextWord(FILE* src, char* dest, char charLimit) {
     char currentChar;
     int i = 0;
     
-    /* reset the destination string */
-    for (i = 0; i < strlen(dest); i++) {
-        dest[i] = '\0';
-    }
-    
     i = 0;
     ignoreWhiteChar(&(*src));
     
@@ -135,6 +130,9 @@ void readNextWord(FILE* src, char* dest, char charLimit) {
             dest[i] = currentChar;
             i++;
         }
+        
+        /* mark the end of the string */
+        dest[i] = '\0';
     }
 }
 
@@ -225,8 +223,9 @@ int readMacro(FILE* file, char* macroName) {
     
     char word[MAX_LINE_SIZE] = {};
     int macroVal = 0;
+    char readedChar;
     
-    readNextWord(file, word, '\0');
+    readNextWord(file, word, '=');
     
     if (isReserved(word))
         printErrorInSrcFile("the macro name is reserved");
@@ -237,9 +236,10 @@ int readMacro(FILE* file, char* macroName) {
     
     strcpy(macroName, word);
     
-    readNextWord(file, word, '\0');
+    ignoreWhiteChar(file);
+    readedChar = fgetc(file);
     
-    if (strcmp(word, "=") != 0)
+    if (readedChar != '=')
         printErrorInSrcFile("wrong macro declaration");
     
     if (!haveErrorInLine) {
@@ -249,9 +249,7 @@ int readMacro(FILE* file, char* macroName) {
         if (!isNumber(word))
             printErrorInSrcFile("illegal macro value");
         
-        ignoreWhiteChar(file);
-        
-        if (fgetc(file) != '\n' && !feof(file))
+        if (!isEndLine(file))
             printErrorInSrcFile("extra end line text");
     }
     
@@ -262,6 +260,9 @@ int readMacro(FILE* file, char* macroName) {
         if (macroVal > MAX_VAL || macroVal < MIN_VAL)
             printErrorInSrcFile("your macro number is to big or to small");
     }
+    
+    if (readedChar == '\n')
+        moveBack(file);
     
     return macroVal;
 }
@@ -625,6 +626,11 @@ void readStringDirective(FILE* file, char* strDest) {
     
     if (!isEndLine(file))
         printErrorInSrcFile("extra end line text");
+}
+
+void readEntryOrExtern(FILE** file, char* optCharName) {
+    
+    
 }
 
 int isReserved(char* word) {
