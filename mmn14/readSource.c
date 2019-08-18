@@ -414,7 +414,7 @@ adOperand readOperand(FILE* file, int isSrcOp) {
     
     else if (isalpha(actualChar)) {
         
-        int isRegister = 0, OpIsReaded = 0;
+        int isRegister = 0;
         
         if (actualChar == 'r') {
             
@@ -423,8 +423,6 @@ adOperand readOperand(FILE* file, int isSrcOp) {
             
             else
                 readNextWord(file, readedWord, '\0');
-            
-            OpIsReaded = 1;
             
             if (strlen(readedWord) == 1) {
                 
