@@ -45,8 +45,9 @@ int readMacro(FILE* file, char* macroName);
 void mvToNextLine(FILE* file);
 instructField readInstruction(FILE* file, int instructType);
 
-int identifyInstruction(char* word); /* return the instruction type and return -1 if the word
-                                        is not an instruction */
+/* return the instruction type and return -1 if the word
+   is not an instruction */
+int identifyInstruction(char* word);
 
 int readDataDirective(FILE* file, char* macroName, int* isEnd);
 void readStringDirective(FILE* file, char* strDest);

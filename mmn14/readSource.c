@@ -479,20 +479,14 @@ adOperand readOperand(FILE* file, int isSrcOp) {
                         
                         tmp = atoi(indexStr);
                         
-                        if (tmp < 0)
-                            printErrorInSrcFile("invalid index number, the index have to be positive");
+                        if (strlen(readedWord) > MAX_MACRO_SIZE)
+                            printErrorInSrcFile("the optional charactere name is too long");
                         
                         else {
                             
-                            if (strlen(readedWord) > MAX_MACRO_SIZE)
-                                printErrorInSrcFile("the optional charactere name is too long");
-                            
-                            else {
-                                
-                                operand.type = index_met;
-                                operand.val = tmp;
-                                strcpy(operand.macroName, readedWord);
-                            }
+                            operand.type = index_met;
+                            operand.val = tmp;
+                            strcpy(operand.macroName, readedWord);
                         }
                     }
                     

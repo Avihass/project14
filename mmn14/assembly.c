@@ -6,7 +6,7 @@
 #include "readSource.h"
 #include "data&signTable.h"
 #include "utils.h"
-#include "bin&specConvert.h"
+#include "files&Convert.h"
 
 #define GO_NEXT_LINE \
     mvToNextLine(srcFile); \
@@ -21,7 +21,10 @@
  \
         if (strcmp(actualInstruct.OP.macroName, "") != 0) { \
  \
-            if (!findMacro(signTabHead, actualInstruct.OP.macroName, &tmpNum)) \
+            if (findSign(signTabHead, actualInstruct.OP.macroName, macro_sign, &tmpNum)) \
+                actualInstruct.OP.val = tmpNum; \
+ \
+            else \
                 printErrorInSrcFile("used undeclared macro name as imediate value"); \
         } \
     } \
@@ -30,7 +33,10 @@
  \
         if (strcmp(actualInstruct.OP.indexName, "") != 0) { \
 \
-            if (!findMacro(signTabHead, actualInstruct.OP.indexName, &tmpNum)) \
+            if (findSign(signTabHead, actualInstruct.OP.indexName, macro_sign, &tmpNum)) \
+                actualInstruct.OP.val = tmpNum; \
+\
+            else \
                 printErrorInSrcFile("used undeclared macro name in index"); \
         } \
     } \
@@ -61,6 +67,7 @@ int main(int argc, const char * argv[]) {
     /* construct the tables */
     signTabCtor(&signTabHead);
     dataTabCtor(&dataTabHead);
+    dataTabCtor(&codeTabHead);
     
     if (argc < 2)
         printError("missing file name in argument");
@@ -76,7 +83,7 @@ int main(int argc, const char * argv[]) {
             strcat(srcFileName, ".as");
             
             if (!(srcFile = fopen(srcFileName, "r")))
-                printError("can't open the source file");
+                printErrorAndStop("can't open the source file");
             
             else
                 printf("==%s opened==\n\n", srcFileName);
@@ -85,7 +92,7 @@ int main(int argc, const char * argv[]) {
         IC = 100;
         DC = 0;
         
-        /* first passage */
+        /* ===== FIRST PASSAGE ===== */
         if (!haveError) {
             
             while (!endOfSrc) {
@@ -144,7 +151,7 @@ int main(int argc, const char * argv[]) {
                         /* if the maro is not empty, the data is a macro */
                         if (strcmp(macroName, "")) {
                             
-                            if (!findMacro(signTabHead, macroName, &dataNum))
+                            if (!findSign(signTabHead, macroName, macro_sign, &dataNum))
                                 printErrorInSrcFile("used undeclared macro name");
                         }
                         
@@ -234,7 +241,7 @@ int main(int argc, const char * argv[]) {
                         
                         if (isAvailableSign(signTabHead, optCharName)) {
                             
-                            addSign(signTabHead, optCharName, instruct_sign, IC);
+                            addSign(signTabHead, optCharName, code_sign, IC);
                         }
                         
                         else
@@ -269,27 +276,226 @@ int main(int argc, const char * argv[]) {
                     endOfSrc = 1;
                 }
                 
-                
+                /* firstWordType is -1 */
+                else {
+                    
+                    GO_NEXT_LINE
+                }
             }/* end of first passage */
+        }
+        
+        /* ===== SECONDE PASSAGE ===== */
+        if (!haveError) {
             
-            /* seconde passage */
-            if (!haveError) {
+            updateDataSign(signTabHead, IC);
+            endOfSrc = 0;
+            actLineInSrc = 0;
+            IC = 0;
+            
+            /* go back to the file begining */
+            fseek(srcFile, 0, SEEK_SET);
+        }
+        
+        while (!endOfSrc && !haveError) {
+            
+            firstWordType = readFirstWord(srcFile, readedFirstWord);
+            
+            if (firstWordType == optional_char)
+                firstWordType = readFirstWord(srcFile, readedFirstWord);
+            
+            /* if true ignore the line */
+            if (firstWordType != entry_line && firstWordType != instruction_line &&
+                firstWordType != end_src_file) {
                 
-                updateDataSign(signTabHead, IC);
-                dataTabCtor(&codeTabHead);
-                endOfSrc = 0;
+                mvToNextLine(srcFile);
+                actLineInSrc++;
             }
             
+            else if (firstWordType == entry_line) {
+                
+                char readedEntry[MAX_MACRO_SIZE];
+                
+                readEntryOrExtern(srcFile, readedEntry);
+                
+                if (!updateEntrySign(signTabHead, readedEntry) && !haveError)
+                    printErrorInSrcFile("the optional charactere to entry is not declared or is a macro");
+                
+                mvToNextLine(srcFile);
+                actLineInSrc++;
+            }
             
+            else if (firstWordType == instruction_line) {
+                
+                signTabPtr foundedSign = NULL;
+                int haveRegInSrc = 0;
+                
+                actualInstruct.type = identifyInstruction(readedFirstWord);
+                actualInstruct = readInstruction(srcFile, actualInstruct.type);
+                resetBinWord(actualAdWord);
+                
+                /* convert to binary adress word */
+                insrtDecToBin(actualAdWord, actualInstruct.type, 6, 9);
+                
+                if (actualInstruct.srcOp.type != -1)
+                    insrtDecToBin(actualAdWord, actualInstruct.srcOp.type, 4, 5);
+                
+                if (actualInstruct.destOp.type != -1)
+                    insrtDecToBin(actualAdWord, actualInstruct.destOp.type, 2, 3);
+                
+                /* set ARE to 00 */
+                insrtDecToBin(actualAdWord, 0, 0, 1);
+                
+                /* add the binary word with adress */
+                addData(codeTabHead, IC, actualAdWord);
+                IC++;
+                
+                /* if true, convert the source and add (1 or 2 binary word) to the code table */
+                if (actualInstruct.srcOp.type != -1) {
+                    
+                    resetBinWord(actualAdWord);
+                    
+                    if (actualInstruct.srcOp.type == imediate_met) {
+                        
+                        insrtDecToBin(actualAdWord, actualInstruct.srcOp.val, 2, 13);
+                        
+                        /* set ARE to 00 */
+                        insrtDecToBin(actualAdWord, 0, 0, 1);
+                        
+                        addData(codeTabHead, IC, actualAdWord);
+                        IC++;
+                    }
+                    
+                    else if (actualInstruct.srcOp.type == direct_met || actualInstruct.srcOp.type == index_met) {
+                        
+                        if (foundedSign == searchSign(signTabHead, actualInstruct.srcOp.macroName)) {
+                            
+                            if (foundedSign->dataType != macro_sign) {
+                                
+                                insrtDecToBin(actualAdWord, foundedSign->value, 2, 13);
+                                
+                                if (foundedSign->dataType == external_sign)
+                                    insrtDecToBin(actualAdWord, 1, 0, 1);
+                                
+                                else
+                                    insrtDecToBin(actualAdWord, 2, 0, 1);
+                                
+                                addData(codeTabHead, IC, actualAdWord);
+                                IC++;
+                                
+                                if (actualInstruct.srcOp.type == index_met) {
+                                    
+                                    resetBinWord(actualAdWord);
+                                    insrtDecToBin(actualAdWord, actualInstruct.srcOp.val, 2, 13);
+                                    insrtDecToBin(actualAdWord, 0, 0, 1);
+                                    addData(codeTabHead, IC, actualAdWord);
+                                    IC++;
+                                }
+                            }
+                            
+                            else
+                                printErrorInSrcFile("used macro as direct operand method");
+                        }
+                        
+                        else
+                            printErrorInSrcFile("used undeclared optional character");
+                    }
+                    
+                    /* the operand method is register */
+                    else {
+                        
+                        haveRegInSrc = 1;
+                        
+                        insrtDecToBin(actualAdWord, actualInstruct.srcOp.val, 5, 7);
+                        
+                        /* if the destination operand is a register too, use only 1 word */
+                        if (actualInstruct.destOp.type == register_met)
+                            insrtDecToBin(actualAdWord, actualInstruct.destOp.val, 2, 4);
+                        
+                        insrtDecToBin(actualAdWord, 0, 0, 1);
+                        addData(codeTabHead, IC, actualAdWord);
+                        IC++;
+                    }
+                }
+                
+                if (actualInstruct.destOp.type != -1) {
+                    
+                    resetBinWord(actualAdWord);
+                    
+                    if (actualInstruct.destOp.type == imediate_met) {
+                        
+                        insrtDecToBin(actualAdWord, actualInstruct.destOp.val, 2, 13);
+                        
+                        /* set ARE to 00 */
+                        insrtDecToBin(actualAdWord, 0, 0, 1);
+                        
+                        addData(codeTabHead, IC, actualAdWord);
+                        IC++;
+                    }
+                    
+                    else if (actualInstruct.destOp.type == direct_met || actualInstruct.destOp.type == index_met) {
+                        
+                        if (foundedSign == searchSign(signTabHead, actualInstruct.destOp.macroName)) {
+                            
+                            if (foundedSign->dataType != macro_sign) {
+                                
+                                insrtDecToBin(actualAdWord, foundedSign->value, 2, 13);
+                                
+                                if (foundedSign->dataType == external_sign) {
+                                    
+                                    insrtDecToBin(actualAdWord, 1, 0, 1);
+                                    
+                                    /* here we add the founded sign in the sign table as a "request" to add the sign
+                                     in .ext file later with IC value */
+                                    addSign(signTabHead, foundedSign->sign, external_sign, IC);
+                                }
+                                
+                                else
+                                    insrtDecToBin(actualAdWord, 2, 0, 1);
+                                
+                                addData(codeTabHead, IC, actualAdWord);
+                                IC++;
+                                
+                                if (actualInstruct.destOp.type == index_met) {
+                                    
+                                    resetBinWord(actualAdWord);
+                                    insrtDecToBin(actualAdWord, actualInstruct.destOp.val, 2, 13);
+                                    insrtDecToBin(actualAdWord, 0, 0, 1);
+                                    addData(codeTabHead, IC, actualAdWord);
+                                    IC++;
+                                }
+                            }
+                            
+                            else
+                                printErrorInSrcFile("used macro as direct operand method");
+                        }
+                        
+                        else
+                            printErrorInSrcFile("used undeclared optional character");
+                    }
+                    
+                    /* the operand is register so we check if we allready add the register
+                     with the source register */
+                    else if (!haveRegInSrc) {
+                        
+                        insrtDecToBin(actualAdWord, actualInstruct.destOp.val, 2, 4);
+                        insrtDecToBin(actualAdWord, 0, 0, 1);
+                        addData(codeTabHead, IC, actualAdWord);
+                        IC++;
+                    }
+                }
+                
+                mvToNextLine(srcFile);
+                actLineInSrc++;
+            }
             
-            
-        }
+            else if (firstWordType == end_src_file)
+                endOfSrc = 1;
+        } /* end of second passage */
         
         freeSignTab(signTabHead, NULL);
         freeDataTab(dataTabHead, NULL);
+        freeDataTab(codeTabHead, NULL);
     }
     
     return 0;
 }
-
-

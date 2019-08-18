@@ -5,7 +5,7 @@
 #include "readSource.h"
 #include "data&signTable.h"
 #include "utils.h"
-#include "bin&specConvert.h"
+#include "files&Convert.h"
 
 /* ============ SIGN TABLE ============ */
 
@@ -60,22 +60,35 @@ void addSign(signTabPtr head, char* signStr, int type, int val) {
     }
 }
 
-int isAvailableSign(signTabPtr head, char* signStr) {
+int isAvailableSign(signTabPtr head, char* signName) {
     
-    if (strcmp(head->sign, signStr) == 0)
+    if (strcmp(head->sign, signName) == 0)
         return 0;
     
     if (head->next == NULL)
         return 1;
     
-    return isAvailableSign(head->next, signStr);
+    return isAvailableSign(head->next, signName);
 }
 
-int findMacro(signTabPtr head, char* macroName, int* findedVal) {
+signTabPtr searchSign(signTabPtr head, char* signName) {
     
-    if (head->dataType == macro_sign) {
+    if (strcmp(head->sign, signName) == 0) {
         
-        if (strcmp(head->sign, macroName) == 0) {
+        return head;
+    }
+    
+    if (head->next == NULL)
+        return NULL;
+    
+    return searchSign(head->next, signName);
+}
+
+int findSign(signTabPtr head, char* signName, int signType, int* findedVal) {
+    
+    if (head->dataType == signType) {
+        
+        if (strcmp(head->sign, signName) == 0) {
             
             *findedVal = head->value;
             return 1;
@@ -85,7 +98,7 @@ int findMacro(signTabPtr head, char* macroName, int* findedVal) {
     if (head->next == NULL)
         return 0;
     
-    return findMacro(head->next, macroName, findedVal);
+    return findSign(head->next, signName, signType, findedVal);
 }
 
 void updateDataSign(signTabPtr head, int IC) {
@@ -97,6 +110,26 @@ void updateDataSign(signTabPtr head, int IC) {
         return;
     
     updateDataSign(head->next, IC);
+}
+
+int updateEntrySign(signTabPtr head, char* entryName) {
+    
+    if (strcmp(head->sign, entryName) == 0) {
+        
+        if (head->dataType == macro_sign)
+            return 0;
+        
+        else {
+            
+            head->dataType = entry_sign;
+            return 1;
+        }
+    }
+    
+    if (head->next == NULL)
+        return 0;
+    
+    return updateEntrySign(head->next, entryName);
 }
 
 void freeSignTab(signTabPtr head, signTabPtr tmp) {
