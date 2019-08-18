@@ -34,6 +34,8 @@ void signTabCtor(signTabPtr* signTabHead); /* construct a first node in a signTa
 void addSign(signTabPtr head, char* signStr, int type, int val);
 int isAvailableSign(signTabPtr head, char* signStr); /* check the availablity of a
                                                     sign name */
+
+int findMacro(signTabPtr head, char* macroName, int* findedVal);
 void freeSignTab(signTabPtr head, signTabPtr tmp);
 
 /* === data table === */

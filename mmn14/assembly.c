@@ -85,7 +85,8 @@ int main(int argc, const char * argv[]) {
         else if (firstWordType == data_line) {
             
             int endOfLine = 0;
-            int readedNum;
+            int dataNum;
+            char macroName[MAX_MACRO_SIZE] = {};
             
             if (haveOptChar) {
                 
@@ -95,13 +96,20 @@ int main(int argc, const char * argv[]) {
             
             while (!endOfLine && !haveErrorInLine) {
                 
-                readedNum = readDataDirective(srcFile, &endOfLine);
+                dataNum = readDataDirective(srcFile, macroName, &endOfLine);
+                
+                /* if the maro is not empty, the data is a macro */
+                if (strcmp(macroName, "")) {
+                    
+                    if (!findMacro(signTabHead, macroName, &dataNum))
+                        printErrorInSrcFile("used undeclared macro name");
+                }
                 
                 if (!haveErrorInLine) {
                     
                     /* insert the number to the data table, in adress word */
                     resetBinWord(actualAdWord);
-                    insrtDecToBin(actualAdWord, readedNum, 0, BIN_WORD_SIZE);
+                    insrtDecToBin(actualAdWord, dataNum, 0, BIN_WORD_SIZE);
                     addData(dataTabHead, DC, actualAdWord);
                     DC++;
                 }
@@ -146,7 +154,36 @@ int main(int argc, const char * argv[]) {
         
         else if (firstWordType == entry_line) {
             
+            char readedEntry[MAX_MACRO_SIZE];
             
+            if (haveOptChar)
+                printf("Warning: optional char before entry line have no meaning");
+            
+            /* just check the line syntax */
+            readEntryOrExtern(srcFile, readedEntry);
+            
+            mvToNextLine(srcFile);
+            actLineInSrc++;
+            haveErrorInLine = 0;
+            haveOptChar = 0;
+        }
+        
+        else if (firstWordType == extern_line) {
+            
+            char readedExtern[MAX_MACRO_SIZE];
+            
+            if (haveOptChar)
+                printf("Warning: optional char before extern line have no meaning");
+            
+            readEntryOrExtern(srcFile, readedExtern);
+            
+            if (!haveErrorInLine)
+                addSign(signTabHead, readedExtern, external_sign, 0);
+            
+            mvToNextLine(srcFile);
+            actLineInSrc++;
+            haveErrorInLine = 0;
+            haveOptChar = 0;
         }
         
         else if (firstWordType == instruction_line) {

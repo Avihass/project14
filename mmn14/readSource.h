@@ -5,10 +5,6 @@
 #define MAX_LINE_SIZE 80
 #define MAX_MACRO_SIZE 31
 
-/* the maximum and minimum value of a number in memory (12 bit length) */
-#define MAX_VAL 2047
-#define MIN_VAL -2048
-
 enum firstWordOpt {
   
     in_macro, data_line, string_line, entry_line, extern_line, optional_char, instruction_line, in_comment, end_src_file,
@@ -54,7 +50,8 @@ instructField readInstruction(FILE* file, char* instructName, int instructType);
 int identifyInstruction(char* word); /* return the instruction type and return -1 if the word
                                         is not an instruction */
 
-int readDataDirective(FILE* file, int* isEnd);
+int readDataDirective(FILE* file, char* macroName, int* isEnd);
 void readStringDirective(FILE* file, char* strDest);
+void readEntryOrExtern(FILE* file, char* optCharName);
 
 #endif /* readSource_h */

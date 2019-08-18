@@ -71,6 +71,23 @@ int isAvailableSign(signTabPtr head, char* signStr) {
     return isAvailableSign(head->next, signStr);
 }
 
+int findMacro(signTabPtr head, char* macroName, int* findedVal) {
+    
+    if (head->dataType == macro_sign) {
+        
+        if (strcmp(head->sign, macroName) == 0) {
+            
+            *findedVal = head->value;
+            return 1;
+        }
+    }
+    
+    if (head->next == NULL)
+        return 0;
+    
+    return findMacro(head->next, macroName, findedVal);
+}
+
 void freeSignTab(signTabPtr head, signTabPtr tmp) {
     
     tmp = head->next;

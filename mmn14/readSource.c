@@ -256,9 +256,6 @@ int readMacro(FILE* file, char* macroName) {
     if (!haveErrorInLine) {
         
         macroVal = atoi(word);
-        
-        if (macroVal > MAX_VAL || macroVal < MIN_VAL)
-            printErrorInSrcFile("your macro number is to big or to small");
     }
     
     if (readedChar == '\n')
@@ -496,7 +493,7 @@ adOperand readOperand(FILE* file, int isSrcOp) {
                         else {
                             
                             if (strlen(readedWord) > MAX_MACRO_SIZE)
-                                printErrorInSrcFile("the optional charactere name is too big");
+                                printErrorInSrcFile("the optional charactere name is too long");
                             
                             else {
                                 
@@ -510,7 +507,7 @@ adOperand readOperand(FILE* file, int isSrcOp) {
                     else if (islegalMacroName(indexStr)) {
                         
                         if (strlen(readedWord) > MAX_MACRO_SIZE)
-                            printErrorInSrcFile("the macro name in index is too big");
+                            printErrorInSrcFile("the macro name in index is too long");
                         
                         else {
                             
@@ -531,7 +528,7 @@ adOperand readOperand(FILE* file, int isSrcOp) {
             else if (islegalMacroName(readedWord)) {
                 
                 if (strlen(readedWord) > MAX_MACRO_SIZE)
-                    printErrorInSrcFile("the optional charactere name is too big");
+                    printErrorInSrcFile("the optional charactere name is too long");
                 
                 else {
                     
@@ -551,7 +548,7 @@ adOperand readOperand(FILE* file, int isSrcOp) {
     return operand;
 }
 
-int readDataDirective(FILE* file, int* isEnd) {
+int readDataDirective(FILE* file, char* macroName, int* isEnd) {
     
     char readedWord[MAX_LINE_SIZE] = {};
     int val = 0;
@@ -562,13 +559,19 @@ int readDataDirective(FILE* file, int* isEnd) {
     if (isNumber(readedWord)) {
         
         val = atoi(readedWord);
+    }
+    
+    else if (islegalMacroName(readedWord)) {
         
-        if (val > MAX_VAL || val < MIN_VAL)
-            printErrorInSrcFile("a value in data is too big or too small");
+        if (strlen(readedWord) <= MAX_MACRO_SIZE)
+            strcpy(macroName, readedWord);
+        
+        else
+            printErrorInSrcFile("the macro name is too long");
     }
     
     else
-        printErrorInSrcFile("a value is not a valid number");
+        printErrorInSrcFile("a value is not a valid number or macro name");
     
     if (!haveErrorInLine) {
         
@@ -628,9 +631,23 @@ void readStringDirective(FILE* file, char* strDest) {
         printErrorInSrcFile("extra end line text");
 }
 
-void readEntryOrExtern(FILE** file, char* optCharName) {
+void readEntryOrExtern(FILE* file, char* optCharName) {
     
+    char readedWord[MAX_LINE_SIZE];
     
+    readNextWord(file, readedWord, '\0');
+    
+    if (strlen(readedWord) > MAX_MACRO_SIZE)
+        printErrorInSrcFile("the optional charactere name is too big");
+    
+    else if (!islegalMacroName(readedWord))
+        printErrorInSrcFile("illegal optional character name");
+    
+    else
+        strcpy(optCharName, readedWord);
+    
+    if (!isEndLine(file))
+        printErrorInSrcFile("extra end line text");
 }
 
 int isReserved(char* word) {
@@ -749,13 +766,15 @@ void mvToNextLine(FILE* file) {
 
 void resetInstruct(instructField* instruction) {
     
+    /* -1 in operand type is for check if an instrunt have a source
+       or destination operand */
     strcpy(instruction->name, "");
     instruction->type = 0;
-    instruction->srcOp.type = 0;
+    instruction->srcOp.type = -1;
     instruction->srcOp.val = 0;
     strcpy(instruction->srcOp.macroName, "");
     strcpy(instruction->srcOp.indexName, "");
-    instruction->destOp.type = 0;
+    instruction->destOp.type = -1;
     instruction->destOp.val = 0;
     strcpy(instruction->destOp.macroName, "");
     strcpy(instruction->destOp.indexName, "");
