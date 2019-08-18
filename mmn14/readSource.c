@@ -23,7 +23,7 @@ int isEndLine(FILE* file);
 int readFirstWord(FILE* file, char* readedWord) {
     
     int charCount = 0;
-    char word[MAX_MACRO_SIZE + 1] = {};
+    char word[MAX_MACRO_SIZE + 1] = {'\0'};
     fpos_t lineBegining;
     char readedChar;
     
@@ -221,7 +221,7 @@ int isLegalOptChar(char* optCharName) {
 
 int readMacro(FILE* file, char* macroName) {
     
-    char word[MAX_LINE_SIZE] = {};
+    char word[MAX_LINE_SIZE] = {'\0'};
     int macroVal = 0;
     char readedChar;
     
@@ -284,10 +284,10 @@ int islegalMacroName(char* macroName) {
 
 instructField readInstruction(FILE* file, int instructType) {
     
+    char actualChar;
+    
     instructField instruction;
     resetInstruct(&instruction);
-    
-    char actualChar;
     
     instruction.type = instructType;
     
@@ -354,7 +354,7 @@ adOperand readOperand(FILE* file, int isSrcOp) {
     
     adOperand operand;
     char actualChar;
-    char readedWord[MAX_LINE_SIZE] = {};
+    char readedWord[MAX_LINE_SIZE] = {'\0'};
     int tmp;
     
     ignoreWhiteChar(file);
@@ -544,7 +544,7 @@ adOperand readOperand(FILE* file, int isSrcOp) {
 
 int readDataDirective(FILE* file, char* macroName, int* isEnd) {
     
-    char readedWord[MAX_LINE_SIZE] = {};
+    char readedWord[MAX_LINE_SIZE] = {'\0'};
     int val = 0;
     char actualChar;
     
@@ -771,5 +771,4 @@ void resetInstruct(instructField* instruction) {
     instruction->destOp.val = 0;
     strcpy(instruction->destOp.macroName, "");
     strcpy(instruction->destOp.indexName, "");
-    instruction->ARE = 0;
 }

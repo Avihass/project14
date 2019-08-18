@@ -88,6 +88,17 @@ int findMacro(signTabPtr head, char* macroName, int* findedVal) {
     return findMacro(head->next, macroName, findedVal);
 }
 
+void updateDataSign(signTabPtr head, int IC) {
+    
+    if (head->dataType == data_sign)
+        head->value += IC;
+    
+    if (head->next == NULL)
+        return;
+    
+    updateDataSign(head->next, IC);
+}
+
 void freeSignTab(signTabPtr head, signTabPtr tmp) {
     
     tmp = head->next;
@@ -97,7 +108,7 @@ void freeSignTab(signTabPtr head, signTabPtr tmp) {
     if (tmp == NULL)
         return;
         
-    return freeSignTab(tmp, NULL);
+    freeSignTab(tmp, NULL);
 }
 
 /* =========== DATA TABLE =========== */
@@ -161,6 +172,6 @@ void freeDataTab(dataTabPtr head, dataTabPtr tmp) {
     if (tmp == NULL)
         return;
     
-    return freeDataTab(tmp, NULL);
+    freeDataTab(tmp, NULL);
 }
 

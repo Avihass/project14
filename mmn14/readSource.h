@@ -38,7 +38,6 @@ typedef struct instructionField {
     int type;
     adOperand srcOp;
     adOperand destOp;
-    int ARE;
 } instructField;
 
 int readFirstWord(FILE* file, char* readedWord);

@@ -36,6 +36,7 @@ int isAvailableSign(signTabPtr head, char* signStr); /* check the availablity of
                                                     sign name */
 
 int findMacro(signTabPtr head, char* macroName, int* findedVal);
+void updateDataSign(signTabPtr head, int IC);
 void freeSignTab(signTabPtr head, signTabPtr tmp);
 
 /* === data table === */
