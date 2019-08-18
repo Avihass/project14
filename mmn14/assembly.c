@@ -21,10 +21,7 @@
  \
         if (strcmp(actualInstruct.OP.macroName, "") != 0) { \
  \
-            if (findSign(signTabHead, actualInstruct.OP.macroName, macro_sign, &tmpNum)) \
-                actualInstruct.OP.val = tmpNum; \
- \
-            else \
+            if (!findSign(signTabHead, actualInstruct.OP.macroName, macro_sign, &tmpNum)) \
                 printErrorInSrcFile("used undeclared macro name as imediate value"); \
         } \
     } \
@@ -33,10 +30,7 @@
  \
         if (strcmp(actualInstruct.OP.indexName, "") != 0) { \
 \
-            if (findSign(signTabHead, actualInstruct.OP.indexName, macro_sign, &tmpNum)) \
-                actualInstruct.OP.val = tmpNum; \
-\
-            else \
+            if (!findSign(signTabHead, actualInstruct.OP.indexName, macro_sign, &tmpNum)) \
                 printErrorInSrcFile("used undeclared macro name in index"); \
         } \
     } \
@@ -93,6 +87,7 @@ int main(int argc, const char * argv[]) {
         DC = 0;
         
         /* ===== FIRST PASSAGE ===== */
+        
         if (!haveError) {
             
             while (!endOfSrc) {
@@ -285,12 +280,13 @@ int main(int argc, const char * argv[]) {
         }
         
         /* ===== SECONDE PASSAGE ===== */
+        
         if (!haveError) {
             
             updateDataSign(signTabHead, IC);
             endOfSrc = 0;
-            actLineInSrc = 0;
-            IC = 0;
+            actLineInSrc = 1;
+            IC = 100;
             
             /* go back to the file begining */
             fseek(srcFile, 0, SEEK_SET);
@@ -356,8 +352,12 @@ int main(int argc, const char * argv[]) {
                     
                     if (actualInstruct.srcOp.type == imediate_met) {
                         
-                        insrtDecToBin(actualAdWord, actualInstruct.srcOp.val, 2, 13);
+                        /* if true the operand is a macro */
+                        if (strcmp(actualInstruct.srcOp.macroName, "") != 0)
+                            findSign(signTabHead, actualInstruct.srcOp.macroName, macro_sign, &(actualInstruct.srcOp.val));
                         
+                        insrtDecToBin(actualAdWord, actualInstruct.srcOp.val, 2, 13);
+                            
                         /* set ARE to 00 */
                         insrtDecToBin(actualAdWord, 0, 0, 1);
                         
@@ -367,7 +367,9 @@ int main(int argc, const char * argv[]) {
                     
                     else if (actualInstruct.srcOp.type == direct_met || actualInstruct.srcOp.type == index_met) {
                         
-                        if (foundedSign == searchSign(signTabHead, actualInstruct.srcOp.macroName)) {
+                        foundedSign = searchSign(signTabHead, actualInstruct.srcOp.macroName);
+                        
+                        if (foundedSign) {
                             
                             if (foundedSign->dataType != macro_sign) {
                                 
@@ -423,7 +425,11 @@ int main(int argc, const char * argv[]) {
                     
                     if (actualInstruct.destOp.type == imediate_met) {
                         
-                        insrtDecToBin(actualAdWord, actualInstruct.destOp.val, 2, 13);
+                        /* if true the operand is a macro */
+                        if (strcmp(actualInstruct.srcOp.macroName, "") != 0)
+                            findSign(signTabHead, actualInstruct.srcOp.macroName, macro_sign, &(actualInstruct.srcOp.val));
+                        
+                        insrtDecToBin(actualAdWord, actualInstruct.srcOp.val, 2, 13);
                         
                         /* set ARE to 00 */
                         insrtDecToBin(actualAdWord, 0, 0, 1);
@@ -434,7 +440,9 @@ int main(int argc, const char * argv[]) {
                     
                     else if (actualInstruct.destOp.type == direct_met || actualInstruct.destOp.type == index_met) {
                         
-                        if (foundedSign == searchSign(signTabHead, actualInstruct.destOp.macroName)) {
+                        foundedSign = searchSign(signTabHead, actualInstruct.destOp.macroName);
+                        
+                        if (foundedSign) {
                             
                             if (foundedSign->dataType != macro_sign) {
                                 
@@ -491,6 +499,44 @@ int main(int argc, const char * argv[]) {
             else if (firstWordType == end_src_file)
                 endOfSrc = 1;
         } /* end of second passage */
+        
+        /* ===== CREATE FILES ===== */
+        
+        if (!haveError) {
+            
+            signTabPtr signIndx = signTabHead;
+            
+            /* remove ".as" */
+            strcpy(srcFileName, argv[argIndx]);
+            
+            /* create .ent file */
+            while (signIndx != NULL) {
+                
+                if (signIndx->dataType == entry_sign) {
+                    
+                    writeToEntFile(srcFileName, signIndx->sign, signIndx->value);
+                }
+                
+                signIndx = signIndx->next;
+            }
+            
+            /* create .ext file */
+            signIndx = signTabHead;
+            
+            while (signIndx != NULL) {
+                
+                /* write the "requested" nodes there are external and with IC value
+                   the 0 value is the original extern sign and not a request */
+                if (signIndx->dataType == external_sign && signIndx->value != 0) {
+                    
+                    writeToExtFile(srcFileName, signIndx->sign, signIndx->value);
+                }
+                
+                signIndx = signIndx->next;
+            }
+            
+            
+        }
         
         freeSignTab(signTabHead, NULL);
         freeDataTab(dataTabHead, NULL);
