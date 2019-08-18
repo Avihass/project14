@@ -35,7 +35,6 @@ typedef struct AdressOperand {
 
 typedef struct instructionField {
     
-    char name[MAX_MACRO_SIZE];
     int type;
     adOperand srcOp;
     adOperand destOp;
@@ -45,7 +44,7 @@ typedef struct instructionField {
 int readFirstWord(FILE* file, char* readedWord);
 int readMacro(FILE* file, char* macroName);
 void mvToNextLine(FILE* file);
-instructField readInstruction(FILE* file, char* instructName, int instructType);
+instructField readInstruction(FILE* file, int instructType);
 
 int identifyInstruction(char* word); /* return the instruction type and return -1 if the word
                                         is not an instruction */

@@ -282,18 +282,12 @@ int islegalMacroName(char* macroName) {
     return 1;
 }
 
-instructField readInstruction(FILE* file, char* instructName, int instructType) {
+instructField readInstruction(FILE* file, int instructType) {
     
     instructField instruction;
     resetInstruct(&instruction);
     
     char actualChar;
-    
-    if (strcmp(instructName, "") != 0)
-        strcpy(instruction.name, instructName);
-    
-    else
-        strcpy(instruction.name, "");
     
     instruction.type = instructType;
     
@@ -768,7 +762,6 @@ void resetInstruct(instructField* instruction) {
     
     /* -1 in operand type is for check if an instrunt have a source
        or destination operand */
-    strcpy(instruction->name, "");
     instruction->type = 0;
     instruction->srcOp.type = -1;
     instruction->srcOp.val = 0;

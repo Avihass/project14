@@ -8,6 +8,34 @@
 #include "utils.h"
 #include "bin&specConvert.h"
 
+#define GO_NEXT_LINE \
+    mvToNextLine(srcFile); \
+    actLineInSrc++; \
+    haveErrorInLine = 0; \
+    haveOptChar = 0;
+
+#define CHECK_INSTRUCT_MACRO(OP) \
+{ \
+    int tmpNum; \
+    if (actualInstruct.OP.type == imediate_met) { \
+ \
+        if (strcmp(actualInstruct.OP.macroName, "") != 0) { \
+ \
+            if (!findMacro(signTabHead, actualInstruct.OP.macroName, &tmpNum)) \
+                printErrorInSrcFile("used undeclared macro name"); \
+        } \
+    } \
+ \
+    else if(actualInstruct.OP.type == index_met) { \
+ \
+        if (strcmp(actualInstruct.OP.indexName, "") != 0) { \
+\
+            if (!findMacro(signTabHead, actualInstruct.OP.indexName, &tmpNum)) \
+                printErrorInSrcFile("used undeclared macro name"); \
+        } \
+    } \
+}
+
 /* the actual line in source file number */
 int actLineInSrc = 1;
 
@@ -15,7 +43,7 @@ int main(int argc, const char * argv[]) {
     
     char srcFileName[MAX_FILE_NAME + 4] = {}; /* +4 character for ".as" and '\0' */
     FILE *srcFile;
-    int firstWordType, instructType;
+    int firstWordType;
     char readedFirstWord[MAX_MACRO_SIZE] = {};
     int endOfSrc = 0;
     char macroName[MAX_MACRO_SIZE] = {};
@@ -76,10 +104,7 @@ int main(int argc, const char * argv[]) {
                     addSign(signTabHead, macroName, macro_sign, macroVal);
             }
             
-            mvToNextLine(srcFile);
-            actLineInSrc++;
-            haveErrorInLine = 0;
-            haveOptChar = 0;
+            GO_NEXT_LINE
         }
         
         else if (firstWordType == data_line) {
@@ -92,6 +117,9 @@ int main(int argc, const char * argv[]) {
                 
                 if (isAvailableSign(signTabHead, optCharName))
                     addSign(signTabHead, optCharName, data_sign, DC);
+                
+                else
+                    printErrorInSrcFile("the optioanal charactere name is not available");
             }
             
             while (!endOfLine && !haveErrorInLine) {
@@ -115,10 +143,7 @@ int main(int argc, const char * argv[]) {
                 }
             }
             
-            mvToNextLine(srcFile);
-            actLineInSrc++;
-            haveErrorInLine = 0;
-            haveOptChar = 0;
+            GO_NEXT_LINE
         }
         
         else if (firstWordType == string_line) {
@@ -130,12 +155,15 @@ int main(int argc, const char * argv[]) {
                 
                 if (isAvailableSign(signTabHead, optCharName))
                     addSign(signTabHead, optCharName, data_sign, DC);
+                
+                else
+                    printErrorInSrcFile("the optioanal charactere name is not available");
             }
             
             readStringDirective(srcFile, readedStr);
             
             /* if the string is not empty */
-            if (readedStr[0] != '\0') {
+            if (strcmp(readedStr, "") != 0 && !haveErrorInLine) {
                 
                 for (i = 0; i < strlen(readedStr); i++) {
                     
@@ -146,10 +174,15 @@ int main(int argc, const char * argv[]) {
                 }
             }
             
-            mvToNextLine(srcFile);
-            actLineInSrc++;
-            haveErrorInLine = 0;
-            haveOptChar = 0;
+            /* add '\0' at the end even if the string is empty */
+            if (!haveErrorInLine) {
+                
+                resetBinWord(actualAdWord);
+                addData(dataTabHead, DC, actualAdWord);
+                DC++;
+            }
+            
+            GO_NEXT_LINE
         }
         
         else if (firstWordType == entry_line) {
@@ -157,15 +190,12 @@ int main(int argc, const char * argv[]) {
             char readedEntry[MAX_MACRO_SIZE];
             
             if (haveOptChar)
-                printf("Warning: optional char before entry line have no meaning");
+                printf("Warning: optional char before entry line have no meaning\n\n");
             
             /* just check the line syntax */
             readEntryOrExtern(srcFile, readedEntry);
             
-            mvToNextLine(srcFile);
-            actLineInSrc++;
-            haveErrorInLine = 0;
-            haveOptChar = 0;
+            GO_NEXT_LINE
         }
         
         else if (firstWordType == extern_line) {
@@ -173,27 +203,39 @@ int main(int argc, const char * argv[]) {
             char readedExtern[MAX_MACRO_SIZE];
             
             if (haveOptChar)
-                printf("Warning: optional char before extern line have no meaning");
+                printf("Warning: optional char before extern line have no meaning\n\n");
             
             readEntryOrExtern(srcFile, readedExtern);
             
             if (!haveErrorInLine)
                 addSign(signTabHead, readedExtern, external_sign, 0);
             
-            mvToNextLine(srcFile);
-            actLineInSrc++;
-            haveErrorInLine = 0;
-            haveOptChar = 0;
+            GO_NEXT_LINE
         }
         
         else if (firstWordType == instruction_line) {
             
-            instructType = identifyInstruction(readedFirstWord);
-            actualInstruct = readInstruction(srcFile, "", instructType);
+            if (haveOptChar) {
+                
+                if (isAvailableSign(signTabHead, optCharName)) {
+                    
+                    addSign(signTabHead, optCharName, instruct_sign, IC);
+                }
+                
+                else
+                    printErrorInSrcFile("the optioanal charactere name is not available");
+            }
             
-            mvToNextLine(srcFile);
-            actLineInSrc++;
-            haveErrorInLine = 0;
+            actualInstruct.type = identifyInstruction(readedFirstWord);
+            actualInstruct = readInstruction(srcFile, actualInstruct.type);
+            
+            /* check if used undeclared macro */
+            CHECK_INSTRUCT_MACRO(srcOp)
+            CHECK_INSTRUCT_MACRO(destOp)
+            
+            IC += instructAdCount(actualInstruct);
+            
+            GO_NEXT_LINE
         }
         
         else if (firstWordType == blank_line || firstWordType == in_comment) {
@@ -201,9 +243,7 @@ int main(int argc, const char * argv[]) {
             if (haveOptChar)
                 printErrorInSrcFile("expected directive or instruction after optional char");
             
-            mvToNextLine(srcFile);
-            actLineInSrc++;
-            haveErrorInLine = 0;
+            GO_NEXT_LINE
         }
         
         else if (firstWordType == end_src_file) {
@@ -213,6 +253,8 @@ int main(int argc, const char * argv[]) {
             
             endOfSrc = 1;
         }
+        
+        printf("%d %d \n", IC, DC);
     }
     
     freeSignTab(signTabHead, NULL);

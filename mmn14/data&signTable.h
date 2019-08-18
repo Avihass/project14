@@ -16,7 +16,7 @@ typedef struct signTable {
 
 enum signType {
     
-    macro_sign, code_sign, data_sign, external_sign
+    macro_sign, code_sign, data_sign, external_sign, instruct_sign
 };
 
 /* data table */
