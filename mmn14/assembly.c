@@ -73,8 +73,11 @@ int main(int argc, const char * argv[]) {
                 strcpy(srcFileName, argv[argIndx]);
                 strcat(srcFileName, ".as");
                 
-                if (!(srcFile = fopen(srcFileName, "r")))
-                    printErrorAndStop("can't open the source file");
+                if (!(srcFile = fopen(srcFileName, "r"))) {
+                    
+                    printf("file number %d not found\n\n", argIndx);
+                    haveError = 1;
+                }
                 
                 else
                     printf("==%s opened==\n\n", srcFileName);
@@ -91,6 +94,8 @@ int main(int argc, const char * argv[]) {
             /* ===== FIRST PASSAGE ===== */
             
             if (!haveError) {
+                
+                actLineInSrc = 1;
                 
                 while (!endOfSrc) {
                     
@@ -593,9 +598,7 @@ int main(int argc, const char * argv[]) {
             endOfSrc = 0;
             haveError = 0;
         }
-        
-        
-    } /* end of if (!haveError && argIndx < argc) */
+    }
     
     return 0;
 }

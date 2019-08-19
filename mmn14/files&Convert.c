@@ -77,7 +77,7 @@ void createObFile(char* srcName, int IC, int DC) {
     strcat(newSrcName, ".ob");
     
     if (!(file = fopen(newSrcName, "a")))
-        printErrorAndStop("can't open the source file");
+        printErrorAndStop("can't open the object file");
     
     fprintf(file, "\t%d %d\n", IC - 100, DC);
     
@@ -93,7 +93,7 @@ void writeToObjectFile(char* srcName, int adress, char* specWord) {
     strcat(newSrcName, ".ob");
     
     if (!(file = fopen(newSrcName, "a")))
-        printErrorAndStop("can't open the source file");
+        printErrorAndStop("can't open the object file");
     
     /* if true print 0 before the adress */
     if (adress < 1000)
@@ -114,7 +114,7 @@ void writeToEntFile(char* srcName, char* optCharName, int adress) {
     strcat(newSrcName, ".ent");
     
     if (!(file = fopen(newSrcName, "a")))
-        printErrorAndStop("can't open the source file");
+        printErrorAndStop("can't open the entry file");
     
     /* if true print 0 before the adress */
     if (adress < 1000)
@@ -135,7 +135,7 @@ void writeToExtFile(char* srcName, char* optCharName, int adress) {
     strcat(newSrcName, ".ext");
     
     if (!(file = fopen(newSrcName, "a")))
-        printErrorAndStop("can't open the source file");
+        printErrorAndStop("can't open the extern file");
     
     /* if true print 0 before the adress */
     if (adress < 1000)
