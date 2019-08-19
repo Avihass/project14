@@ -420,7 +420,7 @@ adOperand readOperand(FILE* file, int isSrcOp) {
             
             readNextWord(file, readedWord, ',');
             
-            if (!isSrcOp && fgetc(file) == ',')
+            if (fgetc(file) == ',' && !isSrcOp)
                     printErrorInSrcFile("illegal comma after destination operand");
             
             moveBack(file);
