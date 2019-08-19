@@ -116,7 +116,7 @@ int updateEntrySign(signTabPtr head, char* entryName) {
     
     if (strcmp(head->sign, entryName) == 0) {
         
-        if (head->dataType == macro_sign)
+        if (head->dataType == macro_sign || head->dataType == external_sign)
             return 0;
         
         else {

@@ -321,7 +321,7 @@ int main(int argc, const char * argv[]) {
                     readEntryOrExtern(srcFile, readedEntry);
                     
                     if (!updateEntrySign(signTabHead, readedEntry) && !haveError)
-                        printErrorInSrcFile("the optional charactere to entry is not declared or is a macro");
+                        printErrorInSrcFile("the optional charactere to entry is not declared or is a macro/external");
                     
                     mvToNextLine(srcFile);
                     actLineInSrc++;
