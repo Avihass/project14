@@ -5,7 +5,7 @@
 #include <ctype.h>
 #include "readSource.h"
 #include "utils.h"
-#include "assembly.h"
+#include "assembler.h"
 
 /* private functions */
 void ignoreWhiteChar(FILE* file);
@@ -626,10 +626,10 @@ void readStringDirective(FILE* file, char* strDest) {
         
         if (haveSecQuote) {
             
-            for (i = i - 1; str[i] != '"' && !haveError; i--) {
+            for (i = i - 2; str[i] != '"' && !haveError; i--) {
                 
                 /* check if there is only blank charactere after the last quote */
-                if (str[i] != ' ' && str[i] != '\t' && str[i] != '"' && str[i] != EOF)
+                if (str[i] != ' ' && str[i] != '\t' && str[i] != '"')
                     printErrorInSrcFile("extra end line text");
             }
             

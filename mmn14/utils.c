@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "utils.h"
-#include "assembly.h"
+#include "assembler.h"
 #include "readSource.h"
 
 int haveError = 0;

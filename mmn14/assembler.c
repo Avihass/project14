@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "assembly.h"
+#include "assembler.h"
 #include "readSource.h"
 #include "data&signTable.h"
 #include "utils.h"

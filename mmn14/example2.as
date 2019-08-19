@@ -1,4 +1,4 @@
-;file src3.as
+;file example2.as
 
 .entry ROW
 .extern R

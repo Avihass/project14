@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "files&Convert.h"
-#include "assembly.h"
+#include "assembler.h"
 #include "utils.h"
 
 void resetBinWord(char* binWord) {
