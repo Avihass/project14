@@ -75,7 +75,7 @@ int main(int argc, const char * argv[]) {
                 
                 if (!(srcFile = fopen(srcFileName, "r"))) {
                     
-                    printf("**%s not found**\n\n", srcFileName);
+                    printf("file number %d not found\n\n", argIndx);
                     haveError = 1;
                 }
                 
@@ -567,15 +567,19 @@ int main(int argc, const char * argv[]) {
                 createObFile(srcFileName, IC, DC);
                 codeIndex = codeTabHead;
                 
-                while (codeIndex != NULL) {
+                /* if there is code adress to write */
+                if (IC > 100) {
                     
-                    binToSpec(codeIndex->binWord, actualSpecWord);
-                    writeToObjectFile(srcFileName, codeIndex->adress, actualSpecWord);
-                    codeIndex = codeIndex->next;
+                    while (codeIndex != NULL) {
+                        
+                        binToSpec(codeIndex->binWord, actualSpecWord);
+                        writeToObjectFile(srcFileName, codeIndex->adress, actualSpecWord);
+                        codeIndex = codeIndex->next;
+                    }
                 }
                 
                 /* write data code */
-                if (DC != 0) {
+                if (DC > 0) {
                     
                     codeIndex = dataTabHead;
                     
