@@ -9,7 +9,7 @@
 MAIN:		add #1,ROW[godel]
 LOOP:		jmp R
 		mov A,r0
-		bne ROW[godel], A
+ROW:		bne LOOP
 STR:		.string "abba"
  
 

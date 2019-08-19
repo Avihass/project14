@@ -418,13 +418,14 @@ adOperand readOperand(FILE* file, int isSrcOp) {
         
         if (actualChar == 'r') {
             
-            if (isSrcOp)
-                readNextWord(file, readedWord, ',');
+            readNextWord(file, readedWord, ',');
             
-            else
-                readNextWord(file, readedWord, '\0');
+            if (!isSrcOp && fgetc(file) == ',')
+                    printErrorInSrcFile("illegal comma after destination operand");
             
-            if (strlen(readedWord) == 1) {
+            moveBack(file);
+            
+            if (strlen(readedWord) == 1 && !haveError) {
                 
                 tmp = atoi(readedWord);
                 
@@ -451,80 +452,87 @@ adOperand readOperand(FILE* file, int isSrcOp) {
             else {
                 
                 moveWordBack(file, ',');
-                readNextWord(file, readedWord, '\0');
+                readNextWord(file, readedWord, ',');
+                
+                if (fgetc(file) == ',')
+                    printErrorInSrcFile("illegal comma after destination operand");
+                
+                moveBack(file);
             }
             
-            /* check if ']' is in the word */
-            indexStr = strchr(readedWord, ']');
-            
-            /* check if we find the close bracket and if the bracket is at the end of the word */
-            if (indexStr != NULL && *(indexStr + 1) == '\0') {
-                
-                /* erase the close brackets to check the number inside */
-                *indexStr = '\0';
-                
+            if (!haveError) {
                 /* check if ']' is in the word */
-                indexStr = strchr(readedWord, '[');
+                indexStr = strchr(readedWord, ']');
                 
-                if (indexStr != NULL) {
+                /* check if we find the close bracket and if the bracket is at the end of the word */
+                if (indexStr != NULL && *(indexStr + 1) == '\0') {
                     
-                    /* erase the '[' in the word for get the name of the
-                     optional character */
+                    /* erase the close brackets to check the number inside */
                     *indexStr = '\0';
                     
-                    /* move indexStr inside the brackets */
-                    indexStr = indexStr + 1;
+                    /* check if ']' is in the word */
+                    indexStr = strchr(readedWord, '[');
                     
-                    if (isNumber(indexStr)) {
+                    if (indexStr != NULL) {
                         
-                        tmp = atoi(indexStr);
+                        /* erase the '[' in the word for get the name of the
+                         optional character */
+                        *indexStr = '\0';
                         
-                        if (strlen(readedWord) > MAX_MACRO_SIZE)
-                            printErrorInSrcFile("the optional charactere name is too long");
+                        /* move indexStr inside the brackets */
+                        indexStr = indexStr + 1;
                         
-                        else {
+                        if (isNumber(indexStr)) {
                             
-                            operand.type = index_met;
-                            operand.val = tmp;
-                            strcpy(operand.macroName, readedWord);
-                        }
-                    }
-                    
-                    else if (islegalMacroName(indexStr)) {
-                        
-                        if (strlen(readedWord) > MAX_MACRO_SIZE)
-                            printErrorInSrcFile("the macro name in index is too long");
-                        
-                        else {
+                            tmp = atoi(indexStr);
                             
-                            operand.type = index_met;
-                            strcpy(operand.macroName, readedWord);
-                            strcpy(operand.indexName, indexStr);
+                            if (strlen(readedWord) > MAX_MACRO_SIZE)
+                                printErrorInSrcFile("the optional charactere name is too long");
+                            
+                            else {
+                                
+                                operand.type = index_met;
+                                operand.val = tmp;
+                                strcpy(operand.macroName, readedWord);
+                            }
                         }
+                        
+                        else if (islegalMacroName(indexStr)) {
+                            
+                            if (strlen(readedWord) > MAX_MACRO_SIZE)
+                                printErrorInSrcFile("the macro name in index is too long");
+                            
+                            else {
+                                
+                                operand.type = index_met;
+                                strcpy(operand.macroName, readedWord);
+                                strcpy(operand.indexName, indexStr);
+                            }
+                        }
+                        
+                        else
+                            printErrorInSrcFile("illegal index name");
                     }
                     
                     else
-                        printErrorInSrcFile("illegal index name");
+                        printErrorInSrcFile("illegal optional character name");
+                }
+                
+                else if (islegalMacroName(readedWord)) {
+                    
+                    if (strlen(readedWord) > MAX_MACRO_SIZE)
+                        printErrorInSrcFile("the optional charactere name is too long");
+                    
+                    else {
+                        
+                        operand.type = direct_met;
+                        strcpy(operand.macroName, readedWord);
+                    }
                 }
                 
                 else
                     printErrorInSrcFile("illegal optional character name");
             }
-            
-            else if (islegalMacroName(readedWord)) {
-                
-                if (strlen(readedWord) > MAX_MACRO_SIZE)
-                    printErrorInSrcFile("the optional charactere name is too long");
-                
-                else {
-                    
-                    operand.type = direct_met;
-                    strcpy(operand.macroName, readedWord);
-                }
-            }
-            
-            else
-                printErrorInSrcFile("illegal optional character name");
         }
     } /* end of: else if (isalpha(actualChar)) */
     
