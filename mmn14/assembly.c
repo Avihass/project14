@@ -567,15 +567,19 @@ int main(int argc, const char * argv[]) {
                 createObFile(srcFileName, IC, DC);
                 codeIndex = codeTabHead;
                 
-                while (codeIndex != NULL) {
+                /* if there is code adress to write */
+                if (IC > 100) {
                     
-                    binToSpec(codeIndex->binWord, actualSpecWord);
-                    writeToObjectFile(srcFileName, codeIndex->adress, actualSpecWord);
-                    codeIndex = codeIndex->next;
+                    while (codeIndex != NULL) {
+                        
+                        binToSpec(codeIndex->binWord, actualSpecWord);
+                        writeToObjectFile(srcFileName, codeIndex->adress, actualSpecWord);
+                        codeIndex = codeIndex->next;
+                    }
                 }
                 
                 /* write data code */
-                if (DC != 0) {
+                if (DC > 0) {
                     
                     codeIndex = dataTabHead;
                     

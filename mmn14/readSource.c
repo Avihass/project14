@@ -598,31 +598,53 @@ int readDataDirective(FILE* file, char* macroName, int* isEnd) {
 
 void readStringDirective(FILE* file, char* strDest) {
     
-    char readedWord[MAX_LINE_SIZE];
+    char str[MAX_LINE_SIZE];
+    char actualChar;
+    int haveSecQuote = 0;
+    int i;
     
-    readNextWord(file, readedWord, '\0');
+    ignoreWhiteChar(file);
+    actualChar = fgetc(file);
     
-    if (readedWord[0] != '"')
+    if (actualChar != '"')
         printErrorInSrcFile("missing quote for string directive");
-    
-    else if (readedWord[strlen(readedWord) - 1] != '"')
-        printErrorInSrcFile("missing quote for string directive");
-    
-    /* check if the string is empty */
-    else if (strlen(strDest) == 2)
-        return;
     
     else {
         
-        /* copy the string without the first quote */
-        strcpy(strDest, readedWord + 1);
+        for (i = 0; actualChar != '\n' && !feof(file); i++) {
+            
+            actualChar = fgetc(file);
+            str[i] = actualChar;
+            
+            /* there is a second (or more) quote */
+            if (actualChar == '"')
+                haveSecQuote = 1;
+        }
         
-        /* erase the last quote */
-        strDest[strlen(strDest) - 1] = '\0';
+        if (!feof(file))
+            moveBack(file);
+        
+        if (haveSecQuote) {
+            
+            for (i = i - 1; str[i] != '"' && !haveError; i--) {
+                
+                /* check if there is only blank charactere after the last quote */
+                if (str[i] != ' ' && str[i] != '\t' && str[i] != '"' && str[i] != EOF)
+                    printErrorInSrcFile("extra end line text");
+            }
+            
+            if (!haveError) {
+                
+                /* erase the last quote and mark the end of string */
+                str[i] = '\0';
+                
+                strcpy(strDest, str);
+            }
+        }
+        
+        else
+            printErrorInSrcFile("missing quote for string directive");
     }
-    
-    if (!isEndLine(file))
-        printErrorInSrcFile("extra end line text");
 }
 
 void readEntryOrExtern(FILE* file, char* optCharName) {
