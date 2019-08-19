@@ -1,2 +1,2 @@
-mmn14: *.c
-	gcc -ansi -pedantic -Wall *.c -o mmn14
+assembler: assembly.c assembly.h readSource.c readSource.h utils.c utils.h data&signTable.c data&signTable.h files&Convert.c files&Convert.h
+	gcc -ansi -pedantic -Wall *.c -o assembler
