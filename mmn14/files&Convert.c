@@ -30,10 +30,41 @@ void insrtDecToBin(char* binDest, int decimal, int begin, int limit) {
     
     int i;
     
-    for (i = begin; i < limit && i < BIN_WORD_SIZE; i++) {
+    for (i = begin; i <= limit && i < BIN_WORD_SIZE; i++) {
         
         binDest[i] = 01 & decimal;
         decimal = decimal >> 1;
+    }
+}
+
+void binToSpec(char* binWord, char* specWord) {
+    
+    int binIndex = BIN_WORD_SIZE - 1, specIndex = 0;
+    
+    while (specIndex < SPEC_WORD_SIZE) {
+        
+        if (binWord[binIndex] == 0) {
+            
+            if (binWord[binIndex - 1] == 0)
+                specWord[specIndex] = '*';
+            
+            /* the second bit is 1 */
+            else
+                specWord[specIndex] = '#';
+        }
+        
+        /* the first bit is 1 */
+        else {
+            
+            if (binWord[binIndex - 1] == 0)
+                specWord[specIndex] = '%';
+            
+            else
+                specWord[specIndex] = '!';
+        }
+        
+        binIndex -= 2;
+        specIndex++;
     }
 }
 
@@ -48,7 +79,7 @@ void createObFile(char* srcName, int IC, int DC) {
     if (!(file = fopen(newSrcName, "a")))
         printErrorAndStop("can't open the source file");
     
-    fprintf(file, "\t%d %d\n", IC, DC);
+    fprintf(file, "\t%d %d\n", IC - 100, DC);
     
     fclose(file);
 }

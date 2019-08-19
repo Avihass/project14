@@ -14,6 +14,9 @@ void cpyBinWord(char* binDest, char* binSrc);
 /* convert a decimal number to binary in a specific place in binary adress word */
 void insrtDecToBin(char* binDest, int decimal, int begin, int limit);
 
+/* convert binary to spec charactere */
+void binToSpec(char* binWord, char* specWord);
+
 /* write the value of IC and DC at the top of the file */
 void createObFile(char* srcName, int IC, int DC);
 
