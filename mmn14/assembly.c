@@ -75,7 +75,7 @@ int main(int argc, const char * argv[]) {
                 
                 if (!(srcFile = fopen(srcFileName, "r"))) {
                     
-                    printf("file number %d not found\n\n", argIndx);
+                    printf("**%s not found**\n\n", srcFileName);
                     haveError = 1;
                 }
                 

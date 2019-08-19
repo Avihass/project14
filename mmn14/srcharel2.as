@@ -9,7 +9,7 @@ MAIN:		mov r5, ARR[sz]
 LOOP:		jmp L2
 		prn #-5
 		mov STR[5], STR[3]
-		sub r1, r4
+ ARR:		sub r1, r4
 		cmp r5, #sz
 		bne END
 L2:		inc K 
