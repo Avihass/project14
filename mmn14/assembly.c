@@ -377,8 +377,14 @@ int main(int argc, const char * argv[]) {
                                     
                                     insrtDecToBin(actualAdWord, foundedSign->value, 2, 13);
                                     
-                                    if (foundedSign->dataType == external_sign)
+                                    if (foundedSign->dataType == external_sign) {
+                                        
                                         insrtDecToBin(actualAdWord, 1, 0, 1);
+                                        
+                                        /* here we add the founded sign in the sign table as a "request" to add the sign
+                                         in .ext file later with IC value */
+                                        addSign(signTabHead, foundedSign->sign, external_sign, IC);
+                                    }
                                     
                                     else
                                         insrtDecToBin(actualAdWord, 2, 0, 1);
@@ -506,8 +512,11 @@ int main(int argc, const char * argv[]) {
                     actLineInSrc++;
                 }
                 
-                else if (firstWordType == end_src_file)
+                else if (firstWordType == end_src_file) {
+                    
                     endOfSrc = 1;
+                    actLineInSrc = 1;
+                }
             } /* end of second passage */
             
             /* ===== CREATE FILES ===== */
@@ -582,6 +591,7 @@ int main(int argc, const char * argv[]) {
             
             argIndx++;
             endOfSrc = 0;
+            haveError = 0;
         }
         
         
